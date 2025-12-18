@@ -1,0 +1,268 @@
+version: '3.8'
+
+# PostgreSQL → MariaDB 10.11 변경
+
+# 3개의 독립적인 MariaDB 인스턴스 구성
+# UTF-8 완전 지원을 위해 utf8mb4 문자셋 사용
+
+# 1. 포트 매핑
+
+# User DB: 3306 포트
+# Product DB: 3307 포트
+# Order DB: 3308 포트
+
+# 2. 접속 정보 단순화
+
+# Username: rozeta
+# Password: rozeta123
+# Root Password: root123
+
+# 3. JDBC URL 변경
+
+# jdbc:mariadb:// 형식 사용
+# UTF-8 인코딩 파라미터 추가
+
+# Enable BuildKit for better caching and parallel builds
+# Run with: DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose -f docker-compose-local.yml build
+
+services:
+  # MariaDB Databases
+  mariadb-user:
+    image: mariadb:10.11
+    container_name: mariadb-user
+    environment:
+      MYSQL_DATABASE: userdb
+      MYSQL_USER: rozeta
+      MYSQL_PASSWORD: rozeta123
+      MYSQL_ROOT_PASSWORD: root123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb-user-data:/var/lib/mysql
+    networks:
+      - enterprise-network
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mariadb-product:
+    image: mariadb:10.11
+    container_name: mariadb-product
+    environment:
+      MYSQL_DATABASE: productdb
+      MYSQL_USER: rozeta
+      MYSQL_PASSWORD: rozeta123
+      MYSQL_ROOT_PASSWORD: root123
+    ports:
+      - "3307:3306"
+    volumes:
+      - mariadb-product-data:/var/lib/mysql
+    networks:
+      - enterprise-network
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mariadb-order:
+    image: mariadb:10.11
+    container_name: mariadb-order
+    environment:
+      MYSQL_DATABASE: orderdb
+      MYSQL_USER: rozeta
+      MYSQL_PASSWORD: rozeta123
+      MYSQL_ROOT_PASSWORD: root123
+    ports:
+      - "3308:3306"
+    volumes:
+      - mariadb-order-data:/var/lib/mysql
+    networks:
+      - enterprise-network
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Config Server
+  config-server:
+    build:
+      context: ./backend/config-server
+      dockerfile: Dockerfile
+      cache_from:
+        - config-server:latest
+    image: config-server:latest
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    networks:
+      - enterprise-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8888/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # Eureka Server
+  eureka-server:
+    build:
+      context: ./backend/eureka-server
+      dockerfile: Dockerfile
+      cache_from:
+        - eureka-server:latest
+    image: eureka-server:latest
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - enterprise-network
+    depends_on:
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # User Service
+  user-service:
+    build:
+      context: ./backend/user-service
+      dockerfile: Dockerfile
+      cache_from:
+        - user-service:latest
+    image: user-service:latest
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-user:3306/userdb?useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: rozeta
+      SPRING_DATASOURCE_PASSWORD: rozeta123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - enterprise-network
+    depends_on:
+      mariadb-user:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    restart: on-failure
+
+  # Product Service
+  product-service:
+    build:
+      context: ./backend/product-service
+      dockerfile: Dockerfile
+      cache_from:
+        - product-service:latest
+    image: product-service:latest
+    container_name: product-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-product:3306/productdb?useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: rozeta
+      SPRING_DATASOURCE_PASSWORD: rozeta123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - enterprise-network
+    depends_on:
+      mariadb-product:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    restart: on-failure
+
+  # Order Service
+  order-service:
+    build:
+      context: ./backend/order-service
+      dockerfile: Dockerfile
+      cache_from:
+        - order-service:latest
+    image: order-service:latest
+    container_name: order-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-order:3306/orderdb?useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: rozeta
+      SPRING_DATASOURCE_PASSWORD: rozeta123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - enterprise-network
+    depends_on:
+      mariadb-order:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      product-service:
+        condition: service_started
+    restart: on-failure
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+      cache_from:
+        - api-gateway:latest
+    image: api-gateway:latest
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - enterprise-network
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      product-service:
+        condition: service_started
+      order-service:
+        condition: service_started
+    restart: on-failure
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend/react-app
+      dockerfile: Dockerfile
+      cache_from:
+        - frontend:latest
+    image: frontend:latest
+    container_name: frontend
+    ports:
+      - "3000:80"
+    networks:
+      - enterprise-network
+    depends_on:
+      - api-gateway
+    restart: on-failure
+
+networks:
+  enterprise-network:
+    driver: bridge
+
+volumes:
+  mariadb-user-data:
+  mariadb-product-data:
+  mariadb-order-data:

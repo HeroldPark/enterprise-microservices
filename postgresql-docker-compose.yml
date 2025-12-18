@@ -1,0 +1,237 @@
+version: '3.8'
+
+# Enable BuildKit for better caching and parallel builds
+# Run with: DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose build
+
+services:
+  # PostgreSQL Databases
+  postgres-user:
+    image: postgres:15-alpine
+    container_name: postgres-user
+    environment:
+      POSTGRES_DB: userdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-user-data:/var/lib/postgresql/data
+    networks:
+      - enterprise-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-product:
+    image: postgres:15-alpine
+    container_name: postgres-product
+    environment:
+      POSTGRES_DB: productdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-product-data:/var/lib/postgresql/data
+    networks:
+      - enterprise-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-order:
+    image: postgres:15-alpine
+    container_name: postgres-order
+    environment:
+      POSTGRES_DB: orderdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-order-data:/var/lib/postgresql/data
+    networks:
+      - enterprise-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Config Server
+  config-server:
+    build:
+      context: ./backend/config-server
+      dockerfile: Dockerfile
+      cache_from:
+        - config-server:latest
+    image: config-server:latest
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    networks:
+      - enterprise-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8888/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # Eureka Server
+  eureka-server:
+    build:
+      context: ./backend/eureka-server
+      dockerfile: Dockerfile
+      cache_from:
+        - eureka-server:latest
+    image: eureka-server:latest
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - enterprise-network
+    depends_on:
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # User Service
+  user-service:
+    build:
+      context: ./backend/user-service
+      dockerfile: Dockerfile
+      cache_from:
+        - user-service:latest
+    image: user-service:latest
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/userdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - enterprise-network
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    restart: on-failure
+
+  # Product Service
+  product-service:
+    build:
+      context: ./backend/product-service
+      dockerfile: Dockerfile
+      cache_from:
+        - product-service:latest
+    image: product-service:latest
+    container_name: product-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-product:5432/productdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - enterprise-network
+    depends_on:
+      postgres-product:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    restart: on-failure
+
+  # Order Service
+  order-service:
+    build:
+      context: ./backend/order-service
+      dockerfile: Dockerfile
+      cache_from:
+        - order-service:latest
+    image: order-service:latest
+    container_name: order-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-order:5432/orderdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - enterprise-network
+    depends_on:
+      postgres-order:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      product-service:
+        condition: service_started
+    restart: on-failure
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+      cache_from:
+        - api-gateway:latest
+    image: api-gateway:latest
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - enterprise-network
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      product-service:
+        condition: service_started
+      order-service:
+        condition: service_started
+    restart: on-failure
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend/react-app
+      dockerfile: Dockerfile
+      cache_from:
+        - frontend:latest
+    image: frontend:latest
+    container_name: frontend
+    ports:
+      - "3000:80"
+    networks:
+      - enterprise-network
+    depends_on:
+      - api-gateway
+    restart: on-failure
+
+networks:
+  enterprise-network:
+    driver: bridge
+
+volumes:
+  postgres-user-data:
+  postgres-product-data:
+  postgres-order-data:

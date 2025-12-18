@@ -1,0 +1,35 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+target/
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+dist/
+build/
+.env
+.env.local
+
+# Docker
+*.pid
