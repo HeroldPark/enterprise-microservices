@@ -31,17 +31,18 @@ services:
     image: mariadb:10.11
     container_name: mariadb-user
     environment:
-      MYSQL_DATABASE: userdb
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-user:3306/user-db?useUnicode=true&characterEncoding=UTF-8
+      MYSQL_DATABASE: user-db
       MYSQL_USER: rozeta
       MYSQL_PASSWORD: rozeta123
-      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_ROOT_PASSWORD: maria123
     ports:
-      - "3306:3306"
+      - "13306:3306"
     volumes:
       - mariadb-user-data:/var/lib/mysql
     networks:
       - enterprise-network
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
@@ -52,17 +53,18 @@ services:
     image: mariadb:10.11
     container_name: mariadb-product
     environment:
-      MYSQL_DATABASE: productdb
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-user:3306/product-db?useUnicode=true&characterEncoding=UTF-8
+      MYSQL_DATABASE: product-db
       MYSQL_USER: rozeta
       MYSQL_PASSWORD: rozeta123
-      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_ROOT_PASSWORD: maria123
     ports:
-      - "3307:3306"
+      - "13307:3306"
     volumes:
       - mariadb-product-data:/var/lib/mysql
     networks:
       - enterprise-network
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
@@ -73,17 +75,18 @@ services:
     image: mariadb:10.11
     container_name: mariadb-order
     environment:
-      MYSQL_DATABASE: orderdb
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-user:3306/order-db?useUnicode=true&characterEncoding=UTF-8
+      MYSQL_DATABASE: order-db
       MYSQL_USER: rozeta
       MYSQL_PASSWORD: rozeta123
-      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_ROOT_PASSWORD: maria123
     ports:
-      - "3308:3306"
+      - "13308:3306"
     volumes:
       - mariadb-order-data:/var/lib/mysql
     networks:
       - enterprise-network
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
@@ -145,7 +148,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-user:3306/userdb?useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-user:3306/user-db?useUnicode=true&characterEncoding=UTF-8
       SPRING_DATASOURCE_USERNAME: rozeta
       SPRING_DATASOURCE_PASSWORD: rozeta123
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
@@ -171,7 +174,7 @@ services:
     ports:
       - "8082:8082"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-product:3306/productdb?useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-product:3306/product-db?useUnicode=true&characterEncoding=UTF-8
       SPRING_DATASOURCE_USERNAME: rozeta
       SPRING_DATASOURCE_PASSWORD: rozeta123
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
@@ -197,7 +200,7 @@ services:
     ports:
       - "8083:8083"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-order:3306/orderdb?useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-order:3306/order-db?useUnicode=true&characterEncoding=UTF-8
       SPRING_DATASOURCE_USERNAME: rozeta
       SPRING_DATASOURCE_PASSWORD: rozeta123
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
