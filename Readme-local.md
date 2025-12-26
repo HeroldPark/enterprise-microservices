@@ -9,16 +9,16 @@
 - 3개의 독립적인 MariaDB 인스턴스 (user, product, order)
 
 ### 2. 포트 매핑
-- mariadb-user: `3306:3306`
-- mariadb-product: `3307:3306`
-- mariadb-order: `3308:3306`
+- mariadb-user: `13306:3306`
+- mariadb-product: `13307:3306`
+- mariadb-order: `13308:3306`
 
 ### 3. 데이터베이스 접속 정보
 ```
-Database: user_db / product_db / order_db
+Database: user-db / product-db / order-db
 Username: rozeta
 Password: rozeta123
-Root Password: root123
+Root Password: maria123
 ```
 
 ### 4. JDBC URL 형식
@@ -40,23 +40,23 @@ spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 ```
 
 ```
-CREATE DATABASE IF NOT EXISTS user_db
+CREATE DATABASE IF NOT EXISTS user-db
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-CREATE DATABASE IF NOT EXISTS product_db
+CREATE DATABASE IF NOT EXISTS product-db
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-CREATE DATABASE IF NOT EXISTS order_db
+CREATE DATABASE IF NOT EXISTS order-db
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
 CREATE USER IF NOT EXISTS 'rozeta'@'localhost' IDENTIFIED BY 'rozeta123';
 
-GRANT ALL PRIVILEGES ON user_db.*    TO 'rozeta'@'localhost';
-GRANT ALL PRIVILEGES ON product_db.* TO 'rozeta'@'localhost';
-GRANT ALL PRIVILEGES ON order_db.*   TO 'rozeta'@'localhost';
+GRANT ALL PRIVILEGES ON user-db.*    TO 'rozeta'@'localhost';
+GRANT ALL PRIVILEGES ON product-db.* TO 'rozeta'@'localhost';
+GRANT ALL PRIVILEGES ON order-db.*   TO 'rozeta'@'localhost';
 
 FLUSH PRIVILEGES;
 ```
@@ -92,17 +92,17 @@ FLUSH PRIVILEGES;
 **application-local.properties 예시:**
 ```properties
 # MariaDB DataSource Configuration
-spring.datasource.url=jdbc:mariadb://localhost:3306/user_db?useUnicode=true&characterEncoding=UTF-8
+spring.datasource.url=jdbc:mariadb://localhost:3306/user-db?useUnicode=true&characterEncoding=UTF-8
 spring.datasource.username=rozeta
 spring.datasource.password=rozeta123
 spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 
-spring.datasource.url=jdbc:mariadb://localhost:3307/product_db?useUnicode=true&characterEncoding=UTF-8
+spring.datasource.url=jdbc:mariadb://localhost:3307/product-db?useUnicode=true&characterEncoding=UTF-8
 spring.datasource.username=rozeta
 spring.datasource.password=rozeta123
 spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 
-spring.datasource.url=jdbc:mariadb://localhost:3308/order_db?useUnicode=true&characterEncoding=UTF-8
+spring.datasource.url=jdbc:mariadb://localhost:3308/order-db?useUnicode=true&characterEncoding=UTF-8
 spring.datasource.username=rozeta
 spring.datasource.password=rozeta123
 spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
@@ -118,7 +118,7 @@ spring.jpa.properties.hibernate.format_sql=true
 ```yaml
 spring:
   datasource:
-    url: jdbc:mariadb://localhost:3306/userdb?useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:mariadb://localhost:3306/user-db?useUnicode=true&characterEncoding=UTF-8
     username: rozeta
     password: rozeta123
     driver-class-name: org.mariadb.jdbc.Driver
@@ -240,3 +240,7 @@ spring.datasource.hikari.connection-timeout=20000
 - MariaDB 10.11은 LTS(Long Term Support) 버전입니다
 - UTF-8 완전 지원을 위해 `utf8mb4` 사용을 권장합니다
 - 프로덕션 환경에서는 보안을 위해 비밀번호를 환경 변수로 관리하세요
+
+# 2025-12-26
+  - gradle 버젼으로 변환
+  - docker desktop 에서 build, run 완료

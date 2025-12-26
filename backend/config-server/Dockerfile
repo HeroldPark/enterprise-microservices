@@ -1,20 +1,11 @@
-# Stage 1: Dependencies cache
-FROM gradle:8.5-jdk21-alpine AS dependencies
+# Stage 1: Build
+FROM gradle:8.11-jdk21-alpine AS build
 WORKDIR /app
-COPY build.gradle settings.gradle ./
-COPY gradle ./gradle
-RUN gradle dependencies --no-daemon
-
-# Stage 2: Build
-FROM gradle:8.5-jdk21-alpine AS build
-WORKDIR /app
-COPY --from=dependencies /root/.gradle /root/.gradle
-COPY build.gradle settings.gradle ./
-COPY gradle ./gradle
+COPY build.gradle ./
 COPY src ./src
 RUN gradle clean build -x test --no-daemon
 
-# Stage 3: Runtime
+# Stage 2: Runtime
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar

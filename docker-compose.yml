@@ -15,7 +15,7 @@ version: '3.8'
 
 # Username: rozeta
 # Password: rozeta123
-# Root Password: root123
+# Root Password: maria123
 
 # 3. JDBC URL 변경
 
@@ -53,7 +53,7 @@ services:
     image: mariadb:10.11
     container_name: mariadb-product
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-user:3306/product-db?useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-product:3306/product-db?useUnicode=true&characterEncoding=UTF-8
       MYSQL_DATABASE: product-db
       MYSQL_USER: rozeta
       MYSQL_PASSWORD: rozeta123
@@ -75,7 +75,7 @@ services:
     image: mariadb:10.11
     container_name: mariadb-order
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-user:3306/order-db?useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-order:3306/order-db?useUnicode=true&characterEncoding=UTF-8
       MYSQL_DATABASE: order-db
       MYSQL_USER: rozeta
       MYSQL_PASSWORD: rozeta123
