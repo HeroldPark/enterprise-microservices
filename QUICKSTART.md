@@ -134,6 +134,8 @@ docker-compose restart service-name
 **Solution:**
 
 ```bash
+docker-compose stop
+docker-compose down
 docker-compose down -v
 docker-compose up -d
 ```

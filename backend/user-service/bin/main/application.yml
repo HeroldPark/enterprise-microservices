@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mariadb://localhost:3306/user_db?useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:mariadb://localhost:3306/user-db?useUnicode=true&characterEncoding=UTF-8
     username: rozeta
     password: rozeta123
     driver-class-name: org.mariadb.jdbc.Driver

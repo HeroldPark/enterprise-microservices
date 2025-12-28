@@ -190,13 +190,13 @@ docker exec -it mariadb-order mariadb -u rozeta -prozeta123 orderdb
 ### 호스트에서 직접 접속 (MySQL Client 필요)
 ```bash
 # User DB
-mysql -h 127.0.0.1 -P 3306 -u rozeta -p userdb
+mysql -h 127.0.0.1 -P 13306 -u rozeta -p user-db
 
 # Product DB
-mysql -h 127.0.0.1 -P 3307 -u rozeta -p productdb
+mysql -h 127.0.0.1 -P 13307 -u rozeta -p product-db
 
 # Order DB
-mysql -h 127.0.0.1 -P 3308 -u rozeta -p orderdb
+mysql -h 127.0.0.1 -P 13308 -u rozeta -p order-db
 ```
 
 ## 문제 해결
@@ -241,6 +241,51 @@ spring.datasource.hikari.connection-timeout=20000
 - UTF-8 완전 지원을 위해 `utf8mb4` 사용을 권장합니다
 - 프로덕션 환경에서는 보안을 위해 비밀번호를 환경 변수로 관리하세요
 
-# 2025-12-26
-  - gradle 버젼으로 변환
-  - docker desktop 에서 build, run 완료
+# 필수 서비스들은 백그라운드에서 실행되고, user-service의 로그는 터미널에서 실시간으로 확인
+
+# 인프라 서비스들은 백그라운드로
+# 모든 서비스 실행
+docker-compose up -d mariadb-user mariadb-product mariadb-order config-server eureka-server product-service order-service frontend
+
+모두 Docker로 실행 (권장)
+# 로컬 User Service 중지 (Ctrl+C)
+# Docker Compose 재시작
+# --build 플래그는 컨테이너를 시작하기 전에 이미지를 다시 빌드하라는 의미
+docker-compose down
+docker-compose up -d --build
+
+# api-gateway user-service만 포그라운드로 (로그 확인하면서)
+docker-compose up api-gateway user-service
+
+# 로그 확인
+docker-compose logs -f product-service
+
+# 모든 서비스 중지
+docker-compose stop
+
+# 단계별 실행
+
+# 1단계: 데이터베이스
+docker-compose up -d mariadb-user
+
+# 2단계: Config Server
+docker-compose up -d config-server
+
+# 3단계: Eureka Server
+docker-compose up -d eureka-server
+
+# 4단계: User Service (로그 보면서)
+docker-compose up -d user-service
+
+# 5단계: API Gateway
+docker-compose up -d api-gateway
+
+# 6단계: Frontend
+docker-compose up -d frontend
+
+# user-service 로그 확인
+docker-compose logs -f user-service
+
+# Maven Wrapper 생성
+mvn -N io.takari:maven:wrapper
+

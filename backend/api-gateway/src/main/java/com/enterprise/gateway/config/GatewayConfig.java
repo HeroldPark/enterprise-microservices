@@ -37,7 +37,7 @@ public class GatewayConfig {
                                 .stripPrefix(1)
                                 .filter(jwtAuthenticationFilter.apply(
                                         new JwtAuthenticationFilter.Config(true))))
-                        .uri("lb://user-service"))
+                        .uri("lb://user-service"))      // ⭐ lb://서비스명
                 
                 // Product Service Routes
                 .route("product-service", r -> r

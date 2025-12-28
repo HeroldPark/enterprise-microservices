@@ -91,21 +91,21 @@ graph TB
 * User registration and authentication
 * JWT token generation
 * Profile management
-* PostgreSQL database: `userdb`
+* PostgreSQL database: `user-db`
 
 ### 5. Product Service (Port 8082)
 
 * CRUD operations for products
 * Pagination and filtering
 * Search by category
-* PostgreSQL database: `productdb`
+* PostgreSQL database: `product-db`
 
 ### 6. Order Service (Port 8083)
 
 * Creating and managing orders
 * Order history
 * Integration with User and Product Services via Feign Client
-* PostgreSQL database: `orderdb`
+* PostgreSQL database: `order-db`
 
 ---
 
@@ -428,9 +428,9 @@ erDiagram
 
 ### PostgreSQL Instances
 
-* **User DB:** `localhost:5432` (`userdb`)
-* **Product DB:** `localhost:5433` (`productdb`)
-* **Order DB:** `localhost:5434` (`orderdb`)
+* **User DB:** `localhost:5432` (`user-db`)
+* **Product DB:** `localhost:5433` (`product-db`)
+* **Order DB:** `localhost:5434` (`order-db`)
 
 **Credentials:**
 
@@ -441,13 +441,13 @@ erDiagram
 
 ```bash
 # User DB
-docker exec -it postgres-user psql -U postgres -d userdb
+docker exec -it postgres-user psql -U postgres -d user-db
 
 # Product DB
-docker exec -it postgres-product psql -U postgres -d productdb
+docker exec -it postgres-product psql -U postgres -d product-db
 
 # Order DB
-docker exec -it postgres-order psql -U postgres -d orderdb
+docker exec -it postgres-order psql -U postgres -d order-db
 ```
 
 ---
@@ -718,7 +718,7 @@ graph LR
 
 ### Backend
 
-* **Java 25** (Oracle JDK)
+* **Java 21** (Oracle JDK)
 * **Spring Boot 3.4.10**
 * **Spring Cloud 2024.0.0**
 * Spring Security + JWT 0.12.3
