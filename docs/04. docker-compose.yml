@@ -25,6 +25,8 @@ version: '3.8'
 # Enable BuildKit for better caching and parallel builds
 # Run with: DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose -f docker-compose-local.yml build
 
+# enterprise-microservices/docker-compose.yml
+
 services:
   # MariaDB Databases
   mariadb-user:

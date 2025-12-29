@@ -1,6 +1,6 @@
-````md
 # Quick Start Guide
 
+````md
 ## Start in 3 Steps
 
 ### 1. Run Docker Compose

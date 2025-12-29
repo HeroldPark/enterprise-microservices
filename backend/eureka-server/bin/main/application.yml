@@ -3,18 +3,18 @@ server:
 
 spring:
   application:
-    name: eureka-server
+    name: eureka-server           # 모든 서비스 정보를 저장하는 전화번호부 역할
 
 eureka:
   instance:
     hostname: localhost
   client:
-    register-with-eureka: false
-    fetch-registry: false
+    register-with-eureka: false   # 자기 자신은 등록 안 함
+    fetch-registry: false         # 레지스트리 안 가져옴
     service-url:
       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
   server:
-    enable-self-preservation: false
+    enable-self-preservation: false     # 네트워크 장애 보호
     eviction-interval-timer-in-ms: 10000
 
 management:

@@ -289,3 +289,10 @@ docker-compose logs -f user-service
 # Maven Wrapper 생성
 mvn -N io.takari:maven:wrapper
 
+# enterprise-microservices 디버깅 성공
+  1) docker-compose up -d              # 모든 서비스 백그라운드로 실행
+  2) docker-compose up user-service    # user-serivce 만 fore ground로 실행
+  3) AuthController.java에서 login() 에서 console.info에 brack point 생성성
+  4) 왼쪽 메뉴에서 Run and Debug > UserServiceApplication 클릭
+  5) http://localhost:3000/ 화면에서 로그인 시도
+  6) 참조 파일 : docker-compose.yml, applications.properties, launch.json, settings.json, application.yml

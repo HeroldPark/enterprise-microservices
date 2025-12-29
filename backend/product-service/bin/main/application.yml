@@ -3,10 +3,13 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mariadb://localhost:3307/product-db?useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:mariadb://localhost:13307/product-db?useUnicode=true&characterEncoding=UTF-8
     username: rozeta
     password: rozeta123
     driver-class-name: org.mariadb.jdbc.Driver
+
+  application:
+    name: product-service  # 🔴 반드시 있어야 함!
 
   jpa:
     hibernate:
@@ -20,7 +23,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
   instance:
