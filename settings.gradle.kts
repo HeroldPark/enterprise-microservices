@@ -19,6 +19,7 @@ include("backend:api-gateway")
 include("backend:user-service")
 include("backend:product-service")
 include("backend:order-service")
+include("backend:board-service")
 
 // Frontend app (기존)
 include("app")

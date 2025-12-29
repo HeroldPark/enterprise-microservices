@@ -27,3 +27,11 @@ git push -u origin master
   < 디버깅 오류 >
   - 메시지 : ConfigError: The project 'board-service' is not a valid java project.
   - 원인 : board-service의 package path가 잘못 되어 있었다.(launch.json)
+  - gradle project 왼쪽 메뉴에서 JAVA PROJETCTS 아래 *.jar 파일을 인식하지 못해서 발생하는 오류
+
+  < 대책 >
+  - Ctrl + Shift + P
+  - "Java: Clean Java Language Server Workspace" 입력 및 실행
+  - Cursor 완전 종료 후 재시작 (중요!)
+  - ./gradlew clean build --refresh-dependencies
+  - ./gradlew build --continuous
