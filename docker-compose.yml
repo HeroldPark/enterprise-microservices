@@ -93,6 +93,28 @@ services:
       timeout: 5s
       retries: 5
 
+  mariadb-board:
+    image: mariadb:10.11
+    container_name: mariadb-board
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-board:3306/board-db?useUnicode=true&characterEncoding=UTF-8
+      MYSQL_DATABASE: board-db
+      MYSQL_USER: rozeta
+      MYSQL_PASSWORD: rozeta123
+      MYSQL_ROOT_PASSWORD: maria123
+    ports:
+      - "13309:3306"
+    volumes:
+      - mariadb-board-data:/var/lib/mysql
+    networks:
+      - enterprise-network
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Config Server
   config-server:
     build:
@@ -147,6 +169,7 @@ services:
     container_name: user-service
     ports:
       - "8081:8081"
+      # - "8081-8083:8081"  # 다중 서버 운영 : 포트 범위 - 자동 스케일링
     environment:
       SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-user:3306/user-db?useUnicode=true&characterEncoding=UTF-8
       SPRING_DATASOURCE_USERNAME: rozeta
@@ -218,6 +241,36 @@ services:
         condition: service_started
     restart: on-failure
 
+  # Board Service
+  board-service:
+    build:
+      context: ./backend/board-service
+      dockerfile: Dockerfile
+      cache_from:
+        - board-service:latest
+    image: board-service:latest
+    container_name: board-service
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-board:3306/board-db?useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: rozeta
+      SPRING_DATASOURCE_PASSWORD: rozeta123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - enterprise-network
+    depends_on:
+      mariadb-board:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      product-service:
+        condition: service_started
+    restart: on-failure
+
   # API Gateway
   api-gateway:
     build:
@@ -241,6 +294,8 @@ services:
       product-service:
         condition: service_started
       order-service:
+        condition: service_started
+      board-service:
         condition: service_started
     restart: on-failure
 
@@ -269,3 +324,4 @@ volumes:
   mariadb-user-data:
   mariadb-product-data:
   mariadb-order-data:
+  mariadb-board-data:

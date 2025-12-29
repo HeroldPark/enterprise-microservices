@@ -21,3 +21,9 @@ git push -u origin master
 
 # 2025-12-29
   - user-service 디버깅 성공 : Readme-local.md 참조
+  - board-service 기능 추가
+  - front-end 디렉토리 구조 변경
+
+  < 디버깅 오류 >
+  - 메시지 : ConfigError: The project 'board-service' is not a valid java project.
+  - 원인 : board-service의 package path가 잘못 되어 있었다.(launch.json)

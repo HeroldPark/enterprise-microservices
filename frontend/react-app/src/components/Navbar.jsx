@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuthStore } from '../store/authStore'
-import { ShoppingCart, User, LogOut, Home, Package } from 'lucide-react'
+import { useAuthStore } from './app/authStore'
+import { ShoppingCart, User, LogOut, Home, Package, MessageSquare } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const Navbar = () => {
@@ -51,6 +51,16 @@ const Navbar = () => {
               >
                 <Package className="h-5 w-5" />
                 <span>Products</span>
+              </Link>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                to="/boards"
+                className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition"
+              >
+                <MessageSquare className="h-5 w-5" />
+                <span>Board</span>
               </Link>
             </motion.div>
 
