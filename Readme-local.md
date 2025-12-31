@@ -296,3 +296,88 @@ mvn -N io.takari:maven:wrapper
   4) 왼쪽 메뉴에서 Run and Debug > UserServiceApplication 클릭
   5) http://localhost:3000/ 화면에서 로그인 시도
   6) 참조 파일 : docker-compose.yml, applications.properties, launch.json, settings.json, application.yml
+
+# 1. Eureka 접속
+curl http://localhost:8761/eureka/apps | grep USER-SERVICE
+
+# 2. Eureka에서 Gateway 등록 확인(→ API-GATEWAY 항목 확인)
+http://localhost:8761
+
+# 3. Gateway 헬스체크
+curl http://localhost:8080/actuator/health
+
+# 4. user-service 직접 호출 (Gateway 우회)
+curl http://localhost:8081/actuator/health
+
+# 5. 로그인 테스트 (Gateway 통해 호출)
+curl http://localhost:8080/api/auth/login -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+
+# Frontend 강제 재빌드
+docker-compose up -d --build --force-recreate frontend
+
+#
+curl "http://localhost:8080/api/boards?page=0&size=10&sortBy=createdAt&direction=DESC" -X GET
+{"content":[{"id":1,"title":"게시판 제목","content":"게시판 내용","author":"shane","viewCount":1,"createdAt":"2025-12-30T14:24:29","updatedAt":"2025-12-30T08:21:24.927821","commentCount":0,"attachmentCount":0}],"pageable":{"pageNumber":0,"pageSize":10,"sort":{"empty":false,"unsorted":false,"sorted":true},"offset":0,"unpaged":false,"paged":true},"last":true,"totalElements":1,"totalPages":1,"size":10,"number":0,"sort":{"empty":false,"unsorted":false,"sorted":true},"first":true,"numberOfElements":1,"empty":false}
+
+# OPTIONS 요청 테스트
+curl -X OPTIONS http://localhost:8080/api/boards \
+  -H "Origin: http://localhost:3000" \
+  -H "Access-Control-Request-Method: GET" \
+  -v
+
+## 필터 실행 순서
+```
+1. CorsPreflightFilter (Order: HIGHEST_PRECEDENCE)
+   ↓ OPTIONS이면 여기서 종료 → 200 OK 반환
+   ↓ OPTIONS 아니면 다음으로
+   
+2. SecurityWebFilterChain (Order: 2)
+   ↓ 인증/인가 체크
+   
+3. JwtAuthenticationFilter
+   ↓ JWT 검증
+   
+4. 실제 라우팅 → Backend Service
+
+## Orders 최종 아키텍처
+
+브라우저
+  ↓
+localStorage (auth-storage + token)
+  ↓
+React (Orders 컴포넌트)
+  ↓
+api.js (Authorization: Bearer TOKEN)
+  ↓
+Nginx (프론트엔드)
+  ↓
+API Gateway (permitAll - 인증 통과) ✅
+  ↓
+order-service
+  ↓
+MySQL
+  ↓
+주문 데이터 반환! 🎊
+
+# ✅ 해결된 문제들 요약
+1️⃣ Zustand Persist 문제
+
+문제: localStorage의 auth-storage와 token 불일치
+해결: api.js에서 auth-storage에서도 token 읽도록 수정
+
+2️⃣ PrivateRoute 인증 체크
+
+문제: Zustand hydration 타이밍 이슈
+해결: hydration 완료 대기 로직 추가
+
+3️⃣ API Gateway 인증
+
+문제: /api/orders/** 경로가 인증 필요로 설정됨
+해결: permitAll()로 변경
+
+4️⃣ Authorization 헤더 전송
+
+문제: localStorage에서 token 못 읽음
+해결: auth-storage fallback 추가

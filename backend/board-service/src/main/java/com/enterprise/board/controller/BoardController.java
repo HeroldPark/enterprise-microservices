@@ -4,6 +4,8 @@ import com.enterprise.board.dto.BoardDto;
 import com.enterprise.board.service.BoardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,8 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@Slf4j
 @RestController
-@RequestMapping("/api/boards")
+@RequestMapping("/boards")
 @RequiredArgsConstructor
 public class BoardController {
     
@@ -42,6 +45,8 @@ public class BoardController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "DESC") String direction) {
+
+        log.debug("getAllBoards 시작");
         
         Sort.Direction sortDirection = direction.equalsIgnoreCase("ASC") ? 
                 Sort.Direction.ASC : Sort.Direction.DESC;
@@ -53,6 +58,9 @@ public class BoardController {
     
     @GetMapping("/{id}")
     public ResponseEntity<BoardDto.DetailResponse> getBoard(@PathVariable Long id) {
+
+        log.debug("getBoard 시작");
+
         BoardDto.DetailResponse response = boardService.getBoard(id);
         return ResponseEntity.ok(response);
     }

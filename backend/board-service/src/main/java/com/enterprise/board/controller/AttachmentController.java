@@ -15,7 +15,7 @@ import java.net.URLEncoder;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/boards/{boardId}/attachments")
+@RequestMapping("/boards/{boardId}/attachments")
 @RequiredArgsConstructor
 public class AttachmentController {
     

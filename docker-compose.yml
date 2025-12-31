@@ -302,7 +302,7 @@ services:
   # Frontend
   frontend:
     build:
-      context: ./frontend/react-app
+      context: ./frontend
       dockerfile: Dockerfile
       cache_from:
         - frontend:latest

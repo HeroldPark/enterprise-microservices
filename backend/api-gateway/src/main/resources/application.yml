@@ -10,34 +10,198 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
+      
+      # ⭐ CORS 전역 설정
       globalcors:
         add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:3000"
+              - "http://localhost:5173"
+            allowedMethods:
+              - "*"
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+            maxAge: 3600
 
+# ============================================================
+# 🔧 Gateway 라우팅 설정 (스케일 아웃용)
+# ============================================================
+gateway:
+  routes:
+    strip-prefix: 1
+    
+    # User Service 설정
+    user:
+      service-uri: lb://user-service
+      auth-path: /api/auth/**
+      api-path: /api/users/**
+    
+    # Product Service 설정
+    product:
+      service-uri: lb://product-service
+      api-path: /api/products/**
+      require-auth: false
+    
+    # Order Service 설정
+    order:
+      service-uri: lb://order-service
+      api-path: /api/orders/**
+      require-auth: true
+    
+    # Board Service 설정
+    board:
+      service-uri: lb://board-service
+      api-path: /api/boards/**
+      search-path: /api/boards/search/**
+      public-methods:
+        - GET
+      auth-methods:
+        - POST
+        - PUT
+        - DELETE
+
+  # ============================================================
+  # 🔐 Security 경로 설정 (스케일 아웃용)
+  # ============================================================
+  security:
+    authenticate-all: false
+    
+    public-paths:
+      auth:
+        - /api/auth/**
+        - /auth/**
+      
+      boards-get:
+        - /api/boards/**
+        - /boards/**
+      
+      products-get:
+        - /api/products/**
+      
+      orders:
+        - /api/orders/**
+      
+      actuator:
+        - /actuator/**
+    
+    authenticated-paths:
+      boards-write:
+        - /api/boards/**
+
+# Eureka 설정
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
   instance:
     prefer-ip-address: true
     lease-renewal-interval-in-seconds: 10
 
+# JWT 설정
 jwt:
   secret: your-secret-key-must-be-at-least-256-bits-long-for-HS256-algorithm
   expiration: 86400000
 
+# Actuator 설정
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,gateway
+        include: health,info,metrics,gateway,refresh
   endpoint:
     health:
       show-details: always
+    refresh:
+      enabled: true
 
+# 로깅 설정
 logging:
   level:
     root: INFO
     com.enterprise.gateway: DEBUG
     org.springframework.cloud.gateway: DEBUG
+    org.springframework.web.cors: DEBUG
+    org.springframework.security: DEBUG
+
+---
+# ============================================================
+# 🛠️ 개발 환경 프로파일
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+gateway:
+  security:
+    authenticate-all: false
+    public-paths:
+      orders:
+        - /api/orders/**
+
+logging:
+  level:
+    com.enterprise.gateway: TRACE
+
+---
+# ============================================================
+# 🚀 프로덕션 환경 프로파일
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: prod
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "https://yourdomain.com"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+            maxAge: 3600
+
+gateway:
+  security:
+    authenticate-all: true
+    public-paths:
+      orders: []
+    authenticated-paths:
+      orders:
+        - /api/orders/**
+
+logging:
+  level:
+    root: WARN
+    com.enterprise.gateway: INFO
+
+---
+# ============================================================
+# 🧪 스테이징 환경 프로파일
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: staging
+
+gateway:
+  security:
+    authenticate-all: true
+    public-paths:
+      orders: []
+
+logging:
+  level:
+    com.enterprise.gateway: DEBUG

@@ -2,76 +2,98 @@ package com.enterprise.gateway.config;
 
 import com.enterprise.gateway.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.reactive.CorsWebFilter;
-import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-import java.util.List;
-
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
+@EnableConfigurationProperties(GatewayRouteProperties.class)
 public class GatewayConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final GatewayRouteProperties routeProperties;
 
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
-        return builder.routes()
-                // User Service Routes
-                .route("user-service-auth", r -> r
-                        .path("/api/auth/**")
-                        .filters(f -> f
-                                .stripPrefix(1)
-                                .filter(jwtAuthenticationFilter.apply(
-                                        new JwtAuthenticationFilter.Config(false))))
-                        .uri("lb://user-service"))
-                
-                .route("user-service", r -> r
-                        .path("/api/users/**")
-                        .filters(f -> f
-                                .stripPrefix(1)
-                                .filter(jwtAuthenticationFilter.apply(
-                                        new JwtAuthenticationFilter.Config(true))))
-                        .uri("lb://user-service"))      // ⭐ lb://서비스명
-                
-                // Product Service Routes
-                .route("product-service", r -> r
-                        .path("/api/products/**")
-                        .filters(f -> f
-                                .stripPrefix(1)
-                                .filter(jwtAuthenticationFilter.apply(
-                                        new JwtAuthenticationFilter.Config(false))))
-                        .uri("lb://product-service"))
-                
-                // Order Service Routes
-                .route("order-service", r -> r
-                        .path("/api/orders/**")
-                        .filters(f -> f
-                                .stripPrefix(1)
-                                .filter(jwtAuthenticationFilter.apply(
-                                        new JwtAuthenticationFilter.Config(true))))
-                        .uri("lb://order-service"))
-                
-                .build();
-    }
+        log.info("Configuring Gateway routes with properties: {}", routeProperties);
+        
+        RouteLocatorBuilder.Builder routes = builder.routes();
+        
+        // User Service Routes
+        routes.route("user-service-auth", r -> r
+                .path(routeProperties.getUser().getAuthPath())
+                .filters(f -> f
+                        .stripPrefix(routeProperties.getStripPrefix())
+                        .filter(jwtAuthenticationFilter.apply(
+                                new JwtAuthenticationFilter.Config(false))))
+                .uri(routeProperties.getUser().getServiceUri()));
+        
+        routes.route("user-service", r -> r
+                .path(routeProperties.getUser().getApiPath())
+                .filters(f -> f
+                        .stripPrefix(routeProperties.getStripPrefix())
+                        .filter(jwtAuthenticationFilter.apply(
+                                new JwtAuthenticationFilter.Config(true))))
+                .uri(routeProperties.getUser().getServiceUri()));
+        
+        // Product Service Routes
+        routes.route("product-service", r -> r
+                .path(routeProperties.getProduct().getApiPath())
+                .filters(f -> f
+                        .stripPrefix(routeProperties.getStripPrefix())
+                        .filter(jwtAuthenticationFilter.apply(
+                                new JwtAuthenticationFilter.Config(
+                                        routeProperties.getProduct().isRequireAuth()))))
+                .uri(routeProperties.getProduct().getServiceUri()));
+        
+        // Order Service Routes
+        routes.route("order-service", r -> r
+                .path(routeProperties.getOrder().getApiPath())
+                .filters(f -> f
+                        .stripPrefix(routeProperties.getStripPrefix())
+                        .filter(jwtAuthenticationFilter.apply(
+                                new JwtAuthenticationFilter.Config(
+                                        routeProperties.getOrder().isRequireAuth()))))
+                .uri(routeProperties.getOrder().getServiceUri()));
 
-    @Bean
-    public CorsWebFilter corsWebFilter() {
-        CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173"));
-        corsConfig.setMaxAge(3600L);
-        corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        corsConfig.setAllowedHeaders(List.of("*"));
-        corsConfig.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfig);
-
-        return new CorsWebFilter(source);
+        // Board Service Routes - Search
+        routes.route("board-service-search", r -> r
+                .path(routeProperties.getBoard().getSearchPath())
+                .and()
+                .method(routeProperties.getBoard().getPublicMethods().toArray(new String[0]))
+                .filters(f -> f
+                        .stripPrefix(routeProperties.getStripPrefix())
+                        .filter(jwtAuthenticationFilter.apply(
+                                new JwtAuthenticationFilter.Config(false))))
+                .uri(routeProperties.getBoard().getServiceUri()));
+        
+        // Board Service Routes - Write/Update/Delete
+        routes.route("board-service-write", r -> r
+                .path(routeProperties.getBoard().getApiPath())
+                .and()
+                .method(routeProperties.getBoard().getAuthMethods().toArray(new String[0]))
+                .filters(f -> f
+                        .stripPrefix(routeProperties.getStripPrefix())
+                        .filter(jwtAuthenticationFilter.apply(
+                                new JwtAuthenticationFilter.Config(true))))
+                .uri(routeProperties.getBoard().getServiceUri()));
+        
+        // Board Service Routes - Read
+        routes.route("board-service-read", r -> r
+                .path(routeProperties.getBoard().getApiPath())
+                .and()
+                .method(routeProperties.getBoard().getPublicMethods().toArray(new String[0]))
+                .filters(f -> f
+                        .stripPrefix(routeProperties.getStripPrefix())
+                        .filter(jwtAuthenticationFilter.apply(
+                                new JwtAuthenticationFilter.Config(false))))
+                .uri(routeProperties.getBoard().getServiceUri()));
+        
+        return routes.build();
     }
 }

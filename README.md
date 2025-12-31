@@ -35,3 +35,55 @@ git push -u origin master
   - Cursor 완전 종료 후 재시작 (중요!)
   - ./gradlew clean build --refresh-dependencies
   - ./gradlew build --continuous
+
+# 2025-12-31
+
+✅ 해결된 문제들 요약
+
+1️⃣ Zustand Persist 문제
+
+문제: localStorage의 auth-storage와 token 불일치
+해결: api.js에서 auth-storage에서도 token 읽도록 수정
+
+2️⃣ PrivateRoute 인증 체크
+
+문제: Zustand hydration 타이밍 이슈
+해결: hydration 완료 대기 로직 추가
+
+3️⃣ API Gateway 인증
+
+문제: /api/orders/** 경로가 인증 필요로 설정됨
+해결: permitAll()로 변경
+
+4️⃣ Authorization 헤더 전송
+
+문제: localStorage에서 token 못 읽음
+해결: auth-storage fallback 추가
+
+# 스케일 아웃을 위한 리팩토링
+
+📦 제공된 파일들
+1️⃣ GatewayConfig.java (리팩토링)
+
+하드코딩된 경로를 Properties로 변경
+각 서비스별 설정을 routeProperties에서 읽음
+
+2️⃣ GatewayRouteProperties.java (신규)
+
+라우팅 설정을 관리하는 Properties 클래스
+User, Product, Order, Board 서비스별 설정
+
+3️⃣ SecurityConfig.java (리팩토링)
+
+보안 경로를 Properties로 변경
+Public/Authenticated 경로를 securityPaths에서 읽음
+
+4️⃣ SecurityPathProperties.java (신규)
+
+보안 경로 설정을 관리하는 Properties 클래스
+Public Paths, Authenticated Paths 분리
+
+5️⃣ application-gateway.yml (설정)
+
+모든 라우팅 및 보안 설정
+Dev/Prod 프로파일별 설정 예시 포함
