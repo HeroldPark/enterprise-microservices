@@ -381,3 +381,17 @@ MySQL
 
 문제: localStorage에서 token 못 읽음
 해결: auth-storage fallback 추가
+
+# Gateway 재시작
+
+# 1. Gateway 중지
+docker-compose stop api-gateway
+
+# 2. 재빌드
+docker-compose build --no-cache api-gateway
+
+# 3. 재시작
+docker-compose up -d api-gateway
+
+# 4. 로그 확인 (라우트가 제대로 로드되는지)
+docker-compose logs -f api-gateway

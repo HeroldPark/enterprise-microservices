@@ -87,3 +87,7 @@ Public Paths, Authenticated Paths 분리
 
 모든 라우팅 및 보안 설정
 Dev/Prod 프로파일별 설정 예시 포함
+
+
+# 2026-01-01
+  - board 인증 처리 구현

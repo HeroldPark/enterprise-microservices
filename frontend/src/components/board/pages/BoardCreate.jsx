@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { boardService } from '../services/boardService'
@@ -7,22 +7,54 @@ import { ArrowLeft, Upload, X } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const BoardCreate = () => {
+  console.log('🎨 BoardCreate 컴포넌트 마운트됨!')
+  
   const navigate = useNavigate()
-  const { user } = useAuthStore()
+  const { user, token } = useAuthStore()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [files, setFiles] = useState([])
 
+  // ✅ useEffect를 컴포넌트 내부로 이동
+  useEffect(() => {
+    console.log('=== 인증 상태 체크 ===')
+    console.log('User:', user)
+    console.log('Token in localStorage:', localStorage.getItem('token'))
+    console.log('Token in authStore:', token)
+    
+    // 로그인 체크
+    if (!user || !token) {
+      console.log('⚠️ 로그인이 필요합니다')
+      alert('로그인이 필요합니다')
+      navigate('/login')
+    }
+  }, [user, token, navigate])
+
   const createMutation = useMutation({
     mutationFn: (data) => {
+      console.log('📤 API 호출 시작:', data)
       if (files.length > 0) {
         return boardService.createBoardWithFiles(data.boardData, data.files)
       }
       return boardService.createBoard(data.boardData)
     },
     onSuccess: (data) => {
+      console.log('✅ 게시글 생성 성공:', data)
       navigate(`/boards/${data.id}`)
     },
+    onError: (error) => {
+      console.error('❌ 게시글 생성 실패:', error)
+      console.error('에러 상세:', error.response?.data)
+      
+      if (error.response?.status === 401) {
+        alert('인증이 만료되었습니다. 다시 로그인해주세요.')
+        navigate('/login')
+      } else if (error.response?.status === 403) {
+        alert('권한이 없습니다.')
+      } else {
+        alert(`게시글 생성에 실패했습니다: ${error.response?.data?.message || error.message}`)
+      }
+    }
   })
 
   const handleFileChange = (e) => {
@@ -43,8 +75,17 @@ const BoardCreate = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     
+    console.log('📝 Submit 버튼 클릭됨')
+    
     if (!title.trim() || !content.trim()) {
       alert('Please fill in all required fields')
+      return
+    }
+
+    if (!user) {
+      console.log('❌ User 없음!')
+      alert('로그인이 필요합니다')
+      navigate('/login')
       return
     }
 
@@ -54,6 +95,9 @@ const BoardCreate = () => {
       author: user.username,
     }
 
+    console.log('📝 게시글 생성 요청:', boardData)
+    console.log('📎 첨부파일 수:', files.length)
+    
     createMutation.mutate({ boardData, files })
   }
 

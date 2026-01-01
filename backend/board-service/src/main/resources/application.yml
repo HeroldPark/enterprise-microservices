@@ -29,6 +29,11 @@ spring:
       max-request-size: 10MB
       file-size-threshold: 2KB
 
+# ✅ JWT 설정 추가 (Gateway와 동일해야 함!)
+jwt:
+  secret: your-secret-key-must-be-at-least-256-bits-long-for-HS256-algorithm
+  expiration: 86400000  # 24시간
+  
 # Eureka Client 설정
 eureka:
   client:

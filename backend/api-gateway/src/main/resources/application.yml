@@ -17,8 +17,10 @@ spring:
         cors-configurations:
           '[/**]':
             allowedOrigins:
-              - "http://localhost:3000"
-              - "http://localhost:5173"
+              - "http://localhost:3000"     # React 개발 서버
+              - "http://localhost:5173"     # Vite 개발 서버
+              - "https://myapp.com"         # 추가
+              - "https://admin.myapp.com"   # 추가
             allowedMethods:
               - "*"
             allowedHeaders:
@@ -63,33 +65,44 @@ gateway:
         - PUT
         - DELETE
 
+    # Payment Service 추가
+    payment:
+      service-uri: lb://payment-service
+      api-path: /api/payments/**
+      require-auth: true
+
   # ============================================================
   # 🔐 Security 경로 설정 (스케일 아웃용)
   # ============================================================
   security:
     authenticate-all: false
     
+    # Public Paths (인증 불필요)
     public-paths:
       auth:
-        - /api/auth/**
+        - /api/auth/**  # 로그인, 회원가입
         - /auth/**
       
-      boards-get:
-        - /api/boards/**
-        - /boards/**
-      
       products-get:
-        - /api/products/**
+        - /api/products/**  # 상품 조회
       
       orders:
-        - /api/orders/**
+        - /api/orders/**    # 상품 주문
+
+      boards-get:
+        - /api/boards/**  # 게시글 조회
+        - /boards/**
       
       actuator:
         - /actuator/**
+
+      payment-check:
+        - /api/payments/status/**  # 결제 상태 조회는 public
     
+    # Authenticated Paths (인증 필요)
     authenticated-paths:
       boards-write:
-        - /api/boards/**
+        - /api/boards/**  # POST, PUT, DELETE 시 인증 필요
 
 # Eureka 설정
 eureka:
@@ -105,9 +118,9 @@ eureka:
 # JWT 설정
 jwt:
   secret: your-secret-key-must-be-at-least-256-bits-long-for-HS256-algorithm
-  expiration: 86400000
+  expiration: 86400000  # 24시간 (밀리초)
 
-# Actuator 설정
+# Actuator 설정 - 모니터링
 management:
   endpoints:
     web:
@@ -131,6 +144,8 @@ logging:
 ---
 # ============================================================
 # 🛠️ 개발 환경 프로파일
+# 실행 방법
+# java -jar gateway.jar --spring.profiles.active=dev
 # ============================================================
 spring:
   config:
@@ -151,6 +166,7 @@ logging:
 ---
 # ============================================================
 # 🚀 프로덕션 환경 프로파일
+# java -jar gateway.jar --spring.profiles.active=prod
 # ============================================================
 spring:
   config:
@@ -190,6 +206,7 @@ logging:
 ---
 # ============================================================
 # 🧪 스테이징 환경 프로파일
+# java -jar gateway.jar --spring.profiles.active=staging
 # ============================================================
 spring:
   config:
