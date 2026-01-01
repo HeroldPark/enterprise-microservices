@@ -84,6 +84,37 @@ public class BoardService {
     }
     
     @Transactional
+    public BoardDto.Response updateBoardWithFiles(Long id, BoardDto.UpdateRequest request, List<MultipartFile> files) {
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("게시글을 찾을 수 없습니다. ID: " + id));
+        
+        board.setTitle(request.getTitle());
+        board.setContent(request.getContent());
+        
+        // 새로운 파일 추가
+        if (files != null && !files.isEmpty()) {
+            for (MultipartFile file : files) {
+                if (!file.isEmpty()) {
+                    String storedFileName = fileStorageService.storeFile(file);
+                    
+                    Attachment attachment = Attachment.builder()
+                            .originalFileName(file.getOriginalFilename())
+                            .storedFileName(storedFileName)
+                            .filePath(fileStorageService.getFileStorageLocation().toString())
+                            .fileSize(file.getSize())
+                            .contentType(file.getContentType())
+                            .board(board)
+                            .build();
+                    
+                    attachmentRepository.save(attachment);
+                }
+            }
+        }
+        
+        return BoardDto.Response.from(board);
+    }
+    
+    @Transactional
     public void deleteBoard(Long id) {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("게시글을 찾을 수 없습니다. ID: " + id));

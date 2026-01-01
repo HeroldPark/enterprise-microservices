@@ -17,8 +17,9 @@ spring:
         cors-configurations:
           '[/**]':
             allowedOrigins:
-              - "http://localhost:3000"     # React 개발 서버
-              - "http://localhost:5173"     # Vite 개발 서버
+              - "http://localhost:3000"     # React
+              - "http://localhost:5173"     # Vite
+              - "http://localhost:8080"     # Gateway
               - "https://myapp.com"         # 추가
               - "https://admin.myapp.com"   # 추가
             allowedMethods:

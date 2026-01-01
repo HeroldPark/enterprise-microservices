@@ -73,6 +73,15 @@ public class BoardController {
         return ResponseEntity.ok(response);
     }
     
+    @PutMapping("/{id}/with-files")
+    public ResponseEntity<BoardDto.Response> updateBoardWithFiles(
+            @PathVariable Long id,
+            @Valid @RequestPart("board") BoardDto.UpdateRequest request,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+        BoardDto.Response response = boardService.updateBoardWithFiles(id, request, files);
+        return ResponseEntity.ok(response);
+    }
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBoard(@PathVariable Long id) {
         boardService.deleteBoard(id);

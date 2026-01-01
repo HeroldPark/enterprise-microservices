@@ -65,6 +65,25 @@ export const boardService = {
     return response.data
   },
 
+  // 파일과 함께 게시글 수정
+  updateBoardWithFiles: async (id, boardData, files) => {
+    const formData = new FormData()
+    formData.append('board', new Blob([JSON.stringify(boardData)], { type: 'application/json' }))
+    
+    if (files && files.length > 0) {
+      files.forEach((file) => {
+        formData.append('files', file)
+      })
+    }
+
+    const response = await api.put(`/boards/${id}/with-files`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    return response.data
+  },
+
   // 게시글 삭제
   deleteBoard: async (id) => {
     await api.delete(`/boards/${id}`)
