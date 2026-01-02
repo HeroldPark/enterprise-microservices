@@ -63,13 +63,23 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                 }
 
                 String username = jwtUtil.extractUsername(token);
-                log.info("JWT authentication successful for user: {} on {} {}", username, method, path);
+                String role = jwtUtil.extractRole(token);  // ⭐ Role 추출
+                
+                log.info("JWT authentication successful for user: {} (role: {}) on {} {}", 
+                        username, role, method, path);
                 
                 // ✅ 사용자 정보를 헤더에 추가 (다운스트림 서비스에서 사용 가능)
-                ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
+                ServerHttpRequest.Builder requestBuilder = exchange.getRequest().mutate()
                         .header("X-User-Name", username)
-                        .header("X-Auth-Token", token)
-                        .build();
+                        .header("X-Auth-Token", token);
+                
+                // ⭐ Role 정보도 헤더에 추가
+                if (role != null) {
+                    requestBuilder.header("X-User-Role", role);
+                    log.debug("Adding role header: X-User-Role={}", role);
+                }
+                
+                ServerHttpRequest modifiedRequest = requestBuilder.build();
 
                 return chain.filter(exchange.mutate().request(modifiedRequest).build());
                 

@@ -41,7 +41,10 @@ gateway:
       service-uri: lb://user-service
       auth-path: /api/auth/**
       api-path: /api/users/**
-    
+      api-admin-path: /api/admin/users/**
+      api-system-path: /api/admin/settings/**
+      api-model-path: /api/admin/model-configs/**
+
     # Product Service 설정
     product:
       service-uri: lb://product-service

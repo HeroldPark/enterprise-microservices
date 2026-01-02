@@ -206,6 +206,7 @@ public class UserManagementService {
         long activeUsers = userRepository.countByEnabled(true);
         long inactiveUsers = userRepository.countByEnabled(false);
         long adminCount = userRepository.countByRole(User.Role.ADMIN);
+        long managerCount = userRepository.countByRole(User.Role.MANAGER);
         long userCount = userRepository.countByRole(User.Role.USER);
         long guestCount = userRepository.countByRole(User.Role.GUEST);
 
@@ -214,6 +215,7 @@ public class UserManagementService {
         stats.put("activeUsers", activeUsers);
         stats.put("inactiveUsers", inactiveUsers);
         stats.put("adminCount", adminCount);
+        stats.put("managerCount", managerCount);
         stats.put("userCount", userCount);
         stats.put("guestCount", guestCount);
 

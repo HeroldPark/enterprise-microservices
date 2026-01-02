@@ -37,6 +37,9 @@ import XGBoost from './components/models/pages/XGBoost'
 import AdminPanel from './components/admin/pages/AdminPanel'
 import UserManagement from './components/admin/pages/UserManagement'
 
+import SystemSettings from './components/system/SystemSettings'
+import ModelConfigs from './components/models/ModelConfigs'
+
 // Test pages (개발용)
 import MenuPermissionsTest from './components/menu/MenuPermissionsTest'
 
@@ -49,7 +52,7 @@ function App() {
       <main className="container mx-auto px-4 py-8">
         <PageTransition key={location.pathname}>
           <Routes location={location}>
-            {/* Public Routes - 모든 사용자 접근 가능 (GUEST, USER, ADMIN) */}
+            {/* Public Routes - 모든 사용자 접근 가능 (GUEST, USER, MANAGER, ADMIN) */}
             <Route path="/" element={<Home />} />
             <Route path="/demo" element={<Demo />} />
             
@@ -170,6 +173,26 @@ function App() {
               element={
                 <RoleBasedRoute requiredRole={ROLES.ADMIN}>
                   <UserManagement />
+                </RoleBasedRoute>
+              }
+            />
+
+            {/* 모델 설정 */}
+            <Route
+              path="/admin/model-configs"
+              element={
+                <RoleBasedRoute requiredRole={ROLES.ADMIN}>
+                  <ModelConfigs />
+                </RoleBasedRoute>
+              }
+            />
+
+            {/* 시스템 설정 */}
+            <Route
+              path="/admin/settings"
+              element={
+                <RoleBasedRoute requiredRole={ROLES.ADMIN}>
+                  <SystemSettings />
                 </RoleBasedRoute>
               }
             />

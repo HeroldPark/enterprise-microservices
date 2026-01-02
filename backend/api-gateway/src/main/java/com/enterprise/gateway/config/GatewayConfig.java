@@ -25,6 +25,16 @@ public class GatewayConfig {
         RouteLocatorBuilder.Builder routes = builder.routes();
         
         // User Service Routes
+        // ⭐ 1. Admin 라우트 (가장 먼저 - 우선순위 높음)
+        routes.route("user-service-admin", r -> r
+                .path(routeProperties.getUser().getApiAdminPath())  // /api/admin/users/**
+                .filters(f -> f
+                        .stripPrefix(routeProperties.getStripPrefix())
+                        .filter(jwtAuthenticationFilter.apply(
+                                new JwtAuthenticationFilter.Config(true))))  // 인증 필수
+                .uri(routeProperties.getUser().getServiceUri()));
+
+        // 2. Auth 라우트 (인증 불필요)
         routes.route("user-service-auth", r -> r
                 .path(routeProperties.getUser().getAuthPath())
                 .filters(f -> f
@@ -32,11 +42,30 @@ public class GatewayConfig {
                         .filter(jwtAuthenticationFilter.apply(
                                 new JwtAuthenticationFilter.Config(false))))
                 .uri(routeProperties.getUser().getServiceUri()));
-        
+
+        // 3. 일반 User API 라우트 (인증 필요)
         routes.route("user-service", r -> r
                 .path(routeProperties.getUser().getApiPath())
                 .filters(f -> f
                         .stripPrefix(routeProperties.getStripPrefix())
+                        .filter(jwtAuthenticationFilter.apply(
+                                new JwtAuthenticationFilter.Config(true))))
+                .uri(routeProperties.getUser().getServiceUri()));
+
+        // 4. 시스템 설정 API 라우트 (인증 필요)
+        routes.route("system-settings", r -> r
+                .path("/api/admin/settings/**")
+                .filters(f -> f
+                        .stripPrefix(1)  // /api 제거
+                        .filter(jwtAuthenticationFilter.apply(
+                                new JwtAuthenticationFilter.Config(true))))
+                .uri(routeProperties.getUser().getServiceUri()));
+
+        // 5. 모델 설정 API 라우트 (인증 필요)
+        routes.route("model-configs", r -> r
+                .path("/api/admin/model-configs/**")
+                .filters(f -> f
+                        .stripPrefix(1)  // /api 제거
                         .filter(jwtAuthenticationFilter.apply(
                                 new JwtAuthenticationFilter.Config(true))))
                 .uri(routeProperties.getUser().getServiceUri()));

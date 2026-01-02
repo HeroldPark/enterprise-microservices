@@ -41,7 +41,7 @@ public class User {
     private String phoneNumber;
     
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private Role role = Role.USER;
     
     @Column(nullable = false)
@@ -56,6 +56,6 @@ public class User {
     private LocalDateTime updatedAt;
     
     public enum Role {
-        GUEST, USER, ADMIN
+        GUEST, USER, MANAGER, ADMIN
     }
 }

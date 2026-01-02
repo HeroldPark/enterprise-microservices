@@ -80,15 +80,29 @@ const AdminPanel = () => {
             <p className="text-sm text-gray-600">게시글 모니터링 및 관리</p>
           </button>
 
-          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left">
+          {/* <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left">
             <h3 className="font-semibold text-gray-900 mb-1">모델 설정</h3>
             <p className="text-sm text-gray-600">AI 모델 파라미터 조정</p>
-          </button>
+          </button> */}
+          <Link
+            to="/admin/model-configs"
+            className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left block"
+          >
+            <h3 className="font-semibold text-gray-900 mb-1">모델 설정</h3>
+            <p className="text-sm text-gray-600">AI 모델 파라미터 조정</p>
+          </Link>
 
-          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left">
+          {/* <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left">
             <h3 className="font-semibold text-gray-900 mb-1">시스템 설정</h3>
             <p className="text-sm text-gray-600">전체 시스템 설정 관리</p>
-          </button>
+          </button> */}
+          <Link 
+            to="/admin/settings"
+            className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-left block"
+          >
+            <h3 className="font-semibold text-gray-900 mb-1">시스템 설정</h3>
+            <p className="text-sm text-gray-600">전체 시스템 설정 관리</p>
+          </Link>
         </div>
       </motion.div>
     </div>

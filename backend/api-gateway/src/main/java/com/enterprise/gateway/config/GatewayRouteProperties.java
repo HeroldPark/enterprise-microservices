@@ -23,6 +23,9 @@ public class GatewayRouteProperties {
         private String serviceUri = "lb://user-service";
         private String authPath = "/api/auth/**";
         private String apiPath = "/api/users/**";
+        private String apiAdminPath = "/api/admin/users/**";
+        private String apiSystemPath = "/api/admin/settings/**";
+        private String apiModelPath = "/api/admin/model-configs/**";
     }
     
     @Data

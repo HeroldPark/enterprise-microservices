@@ -55,11 +55,17 @@ public class UserService {
                 .role(User.Role.USER)
                 .enabled(true)
                 .build();
-        
+
         User savedUser = userRepository.save(user);
-        String token = jwtTokenProvider.generateToken(savedUser.getUsername());
+    
+        // ⭐ Role 정보를 포함한 JWT 토큰 생성
+        String token = jwtTokenProvider.generateToken(
+                savedUser.getUsername(), 
+                savedUser.getRole().name()  // ⭐ Role 추가
+        );
         
-        log.info("User registered successfully: {}", savedUser.getUsername());
+        log.info("User registered successfully: {} with role: {}", 
+            savedUser.getUsername(), savedUser.getRole());
         return new AuthResponse(token, userMapper.toDto(savedUser));
     }
 
@@ -76,9 +82,15 @@ public class UserService {
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + request.getUsername()));
         
-        String token = jwtTokenProvider.generateToken(authentication.getName());
+        // ⭐ Before: String token = jwtTokenProvider.generateToken(authentication.getName());
+        // ⭐ After:
+        String token = jwtTokenProvider.generateToken(
+                authentication.getName(),
+                user.getRole().name()  // ⭐ Role 추가
+        );
         
-        log.info("User logged in successfully: {}", user.getUsername());
+        log.info("User logged in successfully: {} with role: {}", 
+                user.getUsername(), user.getRole());
         return new AuthResponse(token, userMapper.toDto(user));
     }
 

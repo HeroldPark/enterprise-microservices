@@ -8,7 +8,7 @@ import { hasMinimumRole, ROLES } from './menuPermissions'
  * 
  * @param {Object} props
  * @param {ReactNode} props.children - 보호할 컴포넌트
- * @param {string} props.requiredRole - 필요한 최소 권한 (GUEST, USER, ADMIN)
+ * @param {string} props.requiredRole - 필요한 최소 권한 (GUEST, USER, MANAGER, ADMIN)
  * @param {string} props.redirectTo - 권한 없을 때 리다이렉트할 경로 (기본값: '/')
  * @param {boolean} props.showAlert - 권한 없을 때 알림 표시 여부 (기본값: true)
  */
@@ -34,7 +34,9 @@ const RoleBasedRoute = ({
   if (!hasMinimumRole(userRole, requiredRole)) {
     if (showAlert) {
       const roleMessages = {
+        [ROLES.GUEST]: '게스트',
         [ROLES.USER]: '일반 회원',
+        [ROLES.MANAGER]: '매니저',
         [ROLES.ADMIN]: '관리자'
       }
       const requiredRoleName = roleMessages[requiredRole] || requiredRole

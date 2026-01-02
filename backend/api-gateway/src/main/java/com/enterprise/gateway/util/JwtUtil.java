@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -32,6 +33,35 @@ public class JwtUtil {
 
     public Date extractExpiration(String token) {
         return extractAllClaims(token).getExpiration();
+    }
+
+    /**
+     * ⭐ JWT에서 Role 추출
+     */
+    public String extractRole(String token) {
+        Claims claims = extractAllClaims(token);
+        
+        // JWT에 "role" 클레임이 있는 경우
+        Object roleObj = claims.get("role");
+        if (roleObj != null) {
+            return roleObj.toString();
+        }
+        
+        // JWT에 "roles" 또는 "authorities" 클레임이 있는 경우 (첫 번째 값 사용)
+        Object rolesObj = claims.get("roles");
+        if (rolesObj == null) {
+            rolesObj = claims.get("authorities");
+        }
+        
+        if (rolesObj instanceof List) {
+            List<?> roles = (List<?>) rolesObj;
+            if (!roles.isEmpty()) {
+                return roles.get(0).toString();
+            }
+        }
+        
+        log.warn("No role found in JWT token for user: {}", extractUsername(token));
+        return null;
     }
 
     private Claims extractAllClaims(String token) {

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -26,16 +28,31 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(String username) {
+    /**
+     * ⭐ Role을 포함한 JWT 토큰 생성
+     */
+    public String generateToken(String username, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
 
+        Map<String, Object> claims = new HashMap<>();
+        if (role != null) {
+            claims.put("role", role);  // ⭐ Role 클레임 추가
+            log.debug("Generating JWT token for user: {} with role: {}", username, role);
+        }
+
         return Jwts.builder()
+                .claims(claims)        // ⭐ Claims 먼저 설정
                 .subject(username)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    // 하위 호환성을 위한 오버로드
+    public String generateToken(String username) {
+        return generateToken(username, null);
     }
 
     public String getUsernameFromToken(String token) {

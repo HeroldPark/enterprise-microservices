@@ -2,6 +2,7 @@
 export const ROLES = {
   GUEST: 'GUEST',
   USER: 'USER',
+  MANAGER: 'MANAGER',
   ADMIN: 'ADMIN'
 }
 
@@ -12,7 +13,7 @@ export const menuItems = [
     name: 'Home',
     path: '/',
     icon: 'Home',
-    roles: [ROLES.GUEST, ROLES.USER, ROLES.ADMIN], // 모든 사용자 접근 가능
+    roles: [ROLES.GUEST, ROLES.USER, ROLES.MANAGER, ROLES.ADMIN], // 모든 사용자 접근 가능
     order: 1
   },
   {
@@ -20,7 +21,7 @@ export const menuItems = [
     name: 'Boards',
     path: '/boards',
     icon: 'MessageSquare',
-    roles: [ROLES.GUEST, ROLES.USER, ROLES.ADMIN], // 모든 사용자 접근 가능
+    roles: [ROLES.GUEST, ROLES.USER, ROLES.MANAGER, ROLES.ADMIN], // 모든 사용자 접근 가능
     order: 2
   },
   {
@@ -28,7 +29,7 @@ export const menuItems = [
     name: 'Models',
     path: null, // 드롭다운이므로 직접 경로 없음
     icon: 'MessageSquare',
-    roles: [ROLES.USER, ROLES.ADMIN], // USER, ADMIN만 접근 가능
+    roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN], // USER, ADMIN만 접근 가능
     isDropdown: true,
     order: 3,
     subItems: [
@@ -41,7 +42,7 @@ export const menuItems = [
         strengths: '실시간 이상 탐지, 빠른 속도',
         weaknesses: '시계열 패턴 무시',
         path: '/models/isolation-forest',
-        roles: [ROLES.USER, ROLES.ADMIN]
+        roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN]
       },
       {
         id: 'lstm',
@@ -52,7 +53,7 @@ export const menuItems = [
         strengths: '복잡한 시계열 의존성 포착',
         weaknesses: '학습 시간 길고 데이터 많이 필요',
         path: '/models/lstm',
-        roles: [ROLES.USER, ROLES.ADMIN]
+        roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN]
       },
       {
         id: 'gru',
@@ -63,7 +64,7 @@ export const menuItems = [
         strengths: 'LSTM보다 빠르고 효율적',
         weaknesses: '매우 긴 시퀀스에서 성능 저하',
         path: '/models/gru',
-        roles: [ROLES.USER, ROLES.ADMIN]
+        roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN]
       },
       {
         id: 'random-forest',
@@ -74,7 +75,7 @@ export const menuItems = [
         strengths: '특징 중요도 제공, 과적합 방지',
         weaknesses: '시간적 순서 고려 못함',
         path: '/models/random-forest',
-        roles: [ROLES.USER, ROLES.ADMIN]
+        roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN]
       },
       {
         id: 'xgboost',
@@ -85,7 +86,7 @@ export const menuItems = [
         strengths: '최고 수준 정확도, 빠른 속도',
         weaknesses: '하이퍼파라미터 튜닝 복잡',
         path: '/models/xgboost',
-        roles: [ROLES.USER, ROLES.ADMIN]
+        roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN]
       }
     ]
   },
@@ -94,7 +95,7 @@ export const menuItems = [
     name: 'Products',
     path: '/products',
     icon: 'Package',
-    roles: [ROLES.USER, ROLES.ADMIN], // USER, ADMIN만 접근 가능
+    roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN], // USER, ADMIN만 접근 가능
     order: 4
   },
   {
@@ -102,7 +103,7 @@ export const menuItems = [
     name: 'Orders',
     path: '/orders',
     icon: 'ShoppingCart',
-    roles: [ROLES.USER, ROLES.ADMIN], // USER, ADMIN만 접근 가능
+    roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN], // USER, ADMIN만 접근 가능
     order: 5,
     requiresAuth: true // 로그인 필수
   },
@@ -111,7 +112,7 @@ export const menuItems = [
     name: 'Profile',
     path: '/profile',
     icon: 'User',
-    roles: [ROLES.USER, ROLES.ADMIN], // USER, ADMIN만 접근 가능
+    roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN], // USER, ADMIN만 접근 가능
     order: 6,
     requiresAuth: true, // 로그인 필수
     showUsername: true // 사용자 이름 표시
@@ -121,7 +122,7 @@ export const menuItems = [
     name: 'Admin Panel',
     path: '/admin',
     icon: 'Shield',
-    roles: [ROLES.ADMIN], // ADMIN만 접근 가능
+    roles: [ROLES.MANAGER, ROLES.ADMIN], // ADMIN만 접근 가능
     order: 7,
     requiresAuth: true
   }
@@ -152,7 +153,7 @@ export const authMenuItems = {
 
 /**
  * 사용자 권한에 따라 접근 가능한 메뉴 필터링
- * @param {string} userRole - 사용자 권한 (GUEST, USER, ADMIN)
+ * @param {string} userRole - 사용자 권한 (GUEST, USER, MANAGER, ADMIN)
  * @param {boolean} isAuthenticated - 인증 여부
  * @returns {Array} 필터링된 메뉴 아이템
  */
@@ -214,7 +215,8 @@ export const getRoleLevel = (role) => {
   const roleLevels = {
     [ROLES.GUEST]: 0,
     [ROLES.USER]: 1,
-    [ROLES.ADMIN]: 2
+    [ROLES.MANAGER]: 2,
+    [ROLES.ADMIN]: 3
   }
   
   return roleLevels[role] || 0

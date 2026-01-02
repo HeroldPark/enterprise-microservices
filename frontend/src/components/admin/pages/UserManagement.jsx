@@ -175,6 +175,7 @@ const UserManagement = () => {
   const getRoleBadgeStyle = (role) => {
     const styles = {
       ADMIN: 'bg-red-100 text-red-700 border-red-300',
+      MANAGER: 'bg-blue-100 text-blue-700 border-blue-300',
       USER: 'bg-blue-100 text-blue-700 border-blue-300',
       GUEST: 'bg-gray-100 text-gray-700 border-gray-300'
     }
@@ -260,6 +261,7 @@ const UserManagement = () => {
               >
                 <option value="ALL">전체</option>
                 <option value="ADMIN">관리자</option>
+                <option value="MANAGER">매니저</option>
                 <option value="USER">일반 사용자</option>
                 <option value="GUEST">게스트</option>
               </select>
@@ -641,6 +643,7 @@ const UserManagement = () => {
                     >
                       <option value="GUEST">게스트</option>
                       <option value="USER">일반 사용자</option>
+                      <option value="MANAGER">매니저</option>
                       <option value="ADMIN">관리자</option>
                     </select>
                   </div>
