@@ -1,5 +1,6 @@
-package com.enterprise.user.config;
+package com.enterprise.user.security;
 
+import com.enterprise.user.config.GatewayAuthenticationFilter;
 import com.enterprise.user.security.CustomUserDetailsService;
 
 import lombok.RequiredArgsConstructor;

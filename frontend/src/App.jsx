@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { useAuthStore } from './components/app/authStore'
+import { authStore } from './components/app/authStore'
 import Navbar from './components/menu/NavbarWithPermissions'
 import Home from './components/app/Home'
 import Demo from './components/app/Demo'

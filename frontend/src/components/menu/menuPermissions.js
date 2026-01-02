@@ -28,7 +28,7 @@ export const menuItems = [
     id: 'models',
     name: 'Models',
     path: null, // 드롭다운이므로 직접 경로 없음
-    icon: 'MessageSquare',
+    icon: 'Brain',
     roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN], // USER, ADMIN만 접근 가능
     isDropdown: true,
     order: 3,
@@ -108,12 +108,20 @@ export const menuItems = [
     requiresAuth: true // 로그인 필수
   },
   {
+    id: 'demo',
+    name: 'Demo',
+    path: '/demo',
+    icon: 'Sparkles',
+    roles: [ROLES.ADMIN],
+    order: 6
+  },
+  {
     id: 'profile',
     name: 'Profile',
     path: '/profile',
     icon: 'User',
     roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN], // USER, ADMIN만 접근 가능
-    order: 6,
+    order: 7,
     requiresAuth: true, // 로그인 필수
     showUsername: true // 사용자 이름 표시
   },
@@ -123,7 +131,7 @@ export const menuItems = [
     path: '/admin',
     icon: 'Shield',
     roles: [ROLES.MANAGER, ROLES.ADMIN], // ADMIN만 접근 가능
-    order: 7,
+    order: 8,
     requiresAuth: true
   }
 ]

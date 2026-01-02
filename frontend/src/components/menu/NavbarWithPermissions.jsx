@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../app/authStore'
 import { 
   ShoppingCart, User, LogOut, Home, Package, 
-  MessageSquare, ChevronDown, Shield 
+  MessageSquare, ChevronDown, Shield, Brain, Sparkles
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
@@ -35,7 +35,9 @@ const Navbar = () => {
     MessageSquare,
     ShoppingCart,
     User,
-    Shield
+    Shield,
+    Brain,
+    Sparkles
   }
 
   // 아이콘 렌더링 함수

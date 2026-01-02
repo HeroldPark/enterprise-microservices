@@ -625,8 +625,8 @@ const styles = {
     padding: '24px',
     maxWidth: '100%',
     margin: '0 auto',
-    fontFamily: '"SF Pro Display", -apple-system, sans-serif',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    fontFamily: '"Segoe UI", -apple-system, sans-serif',
+    background: '#f5f7fa',
     minHeight: '100vh',
   },
   
@@ -635,11 +635,11 @@ const styles = {
     top: '20px',
     right: '20px',
     padding: '16px 24px',
-    borderRadius: '12px',
+    borderRadius: '8px',
     fontSize: '14px',
     fontWeight: '600',
     zIndex: 10000,
-    boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
   },
   
   notificationSuccess: {
@@ -657,18 +657,16 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: '24px',
-    background: 'rgba(255,255,255,0.95)',
-    padding: '28px',
-    borderRadius: '16px',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.1)',
+    background: 'white',
+    padding: '24px',
+    borderRadius: '12px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
   },
   
   title: {
-    fontSize: '32px',
-    fontWeight: '800',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
+    fontSize: '28px',
+    fontWeight: '700',
+    color: '#1f2937',
     margin: 0,
   },
   
@@ -679,24 +677,23 @@ const styles = {
   },
   
   createButton: {
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: '#3b82f6',
     color: 'white',
     border: 'none',
-    padding: '14px 28px',
-    borderRadius: '10px',
+    padding: '12px 24px',
+    borderRadius: '8px',
     fontSize: '14px',
     fontWeight: '600',
     cursor: 'pointer',
-    boxShadow: '0 4px 16px rgba(102, 126, 234, 0.4)',
-    transition: 'all 0.3s',
+    transition: 'all 0.2s',
   },
   
   filters: {
-    background: 'rgba(255,255,255,0.95)',
-    borderRadius: '16px',
-    padding: '24px',
+    background: 'white',
+    borderRadius: '12px',
+    padding: '20px',
     marginBottom: '20px',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.1)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
   },
   
   searchBox: {
@@ -714,10 +711,10 @@ const styles = {
   
   searchInput: {
     width: '100%',
-    padding: '14px 16px 14px 48px',
+    padding: '12px 12px 12px 44px',
     border: '2px solid #e5e7eb',
-    borderRadius: '10px',
-    fontSize: '15px',
+    borderRadius: '8px',
+    fontSize: '14px',
     outline: 'none',
     boxSizing: 'border-box',
   },
@@ -729,13 +726,13 @@ const styles = {
   },
   
   modelTab: {
-    padding: '10px 18px',
+    padding: '8px 16px',
     border: '2px solid #e5e7eb',
     background: 'white',
-    borderRadius: '10px',
+    borderRadius: '8px',
     cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '600',
+    fontSize: '13px',
+    fontWeight: '500',
     color: '#6b7280',
     transition: 'all 0.2s',
     display: 'flex',
@@ -745,8 +742,6 @@ const styles = {
   
   modelTabActive: {
     color: 'white',
-    transform: 'translateY(-2px)',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
   },
   
   modelIcon: {
@@ -756,26 +751,25 @@ const styles = {
   loading: {
     textAlign: 'center',
     padding: '60px',
-    background: 'rgba(255,255,255,0.95)',
-    borderRadius: '16px',
-    color: '#667eea',
+    background: 'white',
+    borderRadius: '12px',
   },
   
   spinner: {
     width: '48px',
     height: '48px',
-    border: '4px solid rgba(102, 126, 234, 0.2)',
-    borderTop: '4px solid #667eea',
+    border: '4px solid #e5e7eb',
+    borderTop: '4px solid #3b82f6',
     borderRadius: '50%',
     animation: 'spin 1s linear infinite',
     margin: '0 auto 16px',
   },
   
   tableContainer: {
-    background: 'rgba(255,255,255,0.95)',
-    borderRadius: '16px',
+    background: 'white',
+    borderRadius: '12px',
     overflow: 'hidden',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.1)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
   },
   
   table: {
@@ -787,15 +781,13 @@ const styles = {
     padding: '16px',
     textAlign: 'left',
     fontSize: '13px',
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#6b7280',
     background: '#f9fafb',
     borderBottom: '2px solid #e5e7eb',
     cursor: 'pointer',
     userSelect: 'none',
     whiteSpace: 'nowrap',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
   },
   
   tr: {
@@ -970,35 +962,34 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'rgba(0,0,0,0.6)',
+    background: 'rgba(0,0,0,0.5)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
-    backdropFilter: 'blur(4px)',
   },
   
   modal: {
     background: 'white',
-    borderRadius: '16px',
+    borderRadius: '12px',
     width: '90%',
-    maxWidth: '800px',
+    maxWidth: '700px',
     maxHeight: '90vh',
     overflow: 'auto',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+    boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
   },
   
   modalHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '24px 28px',
-    borderBottom: '2px solid #f3f4f6',
+    padding: '20px 24px',
+    borderBottom: '1px solid #e5e7eb',
   },
   
   modalTitle: {
-    fontSize: '22px',
-    fontWeight: '700',
+    fontSize: '20px',
+    fontWeight: '600',
     color: '#1f2937',
     margin: 0,
   },
@@ -1015,7 +1006,7 @@ const styles = {
   },
   
   form: {
-    padding: '28px',
+    padding: '24px',
   },
   
   formGrid: {
@@ -1039,9 +1030,9 @@ const styles = {
   
   input: {
     width: '100%',
-    padding: '12px',
+    padding: '10px 12px',
     border: '2px solid #e5e7eb',
-    borderRadius: '8px',
+    borderRadius: '6px',
     fontSize: '14px',
     outline: 'none',
     transition: 'border-color 0.2s',
@@ -1050,9 +1041,9 @@ const styles = {
   
   textarea: {
     width: '100%',
-    padding: '12px',
+    padding: '10px 12px',
     border: '2px solid #e5e7eb',
-    borderRadius: '8px',
+    borderRadius: '6px',
     fontSize: '14px',
     fontFamily: 'inherit',
     outline: 'none',
@@ -1062,9 +1053,9 @@ const styles = {
   
   select: {
     width: '100%',
-    padding: '12px',
+    padding: '10px 12px',
     border: '2px solid #e5e7eb',
-    borderRadius: '8px',
+    borderRadius: '6px',
     fontSize: '14px',
     outline: 'none',
     background: 'white',
@@ -1099,15 +1090,15 @@ const styles = {
     gap: '12px',
     justifyContent: 'flex-end',
     marginTop: '24px',
-    paddingTop: '24px',
-    borderTop: '2px solid #f3f4f6',
+    paddingTop: '20px',
+    borderTop: '1px solid #e5e7eb',
   },
   
   cancelButton: {
-    padding: '12px 24px',
+    padding: '10px 20px',
     border: '2px solid #e5e7eb',
     background: 'white',
-    borderRadius: '8px',
+    borderRadius: '6px',
     fontSize: '14px',
     fontWeight: '600',
     cursor: 'pointer',
@@ -1116,15 +1107,14 @@ const styles = {
   },
   
   submitButton: {
-    padding: '12px 32px',
+    padding: '10px 24px',
     border: 'none',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: '#3b82f6',
     color: 'white',
-    borderRadius: '8px',
+    borderRadius: '6px',
     fontSize: '14px',
     fontWeight: '600',
     cursor: 'pointer',
-    boxShadow: '0 4px 16px rgba(102, 126, 234, 0.4)',
     transition: 'all 0.2s',
   },
 };
