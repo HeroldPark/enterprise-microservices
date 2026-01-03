@@ -17,6 +17,7 @@ public class GatewayRouteProperties {
     private ProductServiceConfig product = new ProductServiceConfig();
     private OrderServiceConfig order = new OrderServiceConfig();
     private BoardServiceConfig board = new BoardServiceConfig();
+    private AdminServiceConfig admin = new AdminServiceConfig();
     
     @Data
     public static class UserServiceConfig {
@@ -49,5 +50,13 @@ public class GatewayRouteProperties {
         private String searchPath = "/api/boards/search/**";
         private List<String> publicMethods = List.of("GET");
         private List<String> authMethods = List.of("POST", "PUT", "DELETE");
+    }
+    
+    @Data
+    public static class AdminServiceConfig {
+        private String serviceUri = "lb://admin-service";
+        private String apiPath = "/api/menus/**";
+        private boolean requireAuth = true;
+        private boolean adminOnly = true;
     }
 }

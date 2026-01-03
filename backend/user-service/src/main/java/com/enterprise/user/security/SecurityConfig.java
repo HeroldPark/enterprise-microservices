@@ -1,7 +1,7 @@
 package com.enterprise.user.security;
 
 import com.enterprise.user.config.GatewayAuthenticationFilter;
-import com.enterprise.user.security.CustomUserDetailsService;
+import com.enterprise.user.service.CustomUserDetailsService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

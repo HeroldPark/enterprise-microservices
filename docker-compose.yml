@@ -1,29 +1,27 @@
 version: '3.8'
 
 # PostgreSQL → MariaDB 10.11 변경
+# MongoDB 대신 MariaDB 사용 (Admin Service용)
 
-# 3개의 독립적인 MariaDB 인스턴스 구성
+# 5개의 독립적인 MariaDB 인스턴스 구성
 # UTF-8 완전 지원을 위해 utf8mb4 문자셋 사용
 
-# 1. 포트 매핑
-
+# 포트 매핑
 # User DB: 13306 포트
 # Product DB: 13307 포트
 # Order DB: 13308 포트
+# Board DB: 13309 포트
+# Admin DB: 13310 포트
 
-# 2. 접속 정보 단순화
+# 접속 정보 단순화
+# MariaDB - Username: rozeta, Password: rozeta123, Root Password: maria123
 
-# Username: rozeta
-# Password: rozeta123
-# Root Password: maria123
-
-# 3. JDBC URL 변경
-
+# JDBC URL 변경
 # jdbc:mariadb:// 형식 사용
 # UTF-8 인코딩 파라미터 추가
 
 # Enable BuildKit for better caching and parallel builds
-# Run with: DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose -f docker-compose-local.yml build
+# Run with: DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose build
 
 services:
   # MariaDB Databases
@@ -31,7 +29,6 @@ services:
     image: mariadb:10.11
     container_name: mariadb-user
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-user:3306/user-db?useUnicode=true&characterEncoding=UTF-8
       MYSQL_DATABASE: user-db
       MYSQL_USER: rozeta
       MYSQL_PASSWORD: rozeta123
@@ -53,7 +50,6 @@ services:
     image: mariadb:10.11
     container_name: mariadb-product
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-product:3306/product-db?useUnicode=true&characterEncoding=UTF-8
       MYSQL_DATABASE: product-db
       MYSQL_USER: rozeta
       MYSQL_PASSWORD: rozeta123
@@ -75,7 +71,6 @@ services:
     image: mariadb:10.11
     container_name: mariadb-order
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-order:3306/order-db?useUnicode=true&characterEncoding=UTF-8
       MYSQL_DATABASE: order-db
       MYSQL_USER: rozeta
       MYSQL_PASSWORD: rozeta123
@@ -97,7 +92,6 @@ services:
     image: mariadb:10.11
     container_name: mariadb-board
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-board:3306/board-db?useUnicode=true&characterEncoding=UTF-8
       MYSQL_DATABASE: board-db
       MYSQL_USER: rozeta
       MYSQL_PASSWORD: rozeta123
@@ -106,6 +100,28 @@ services:
       - "13309:3306"
     volumes:
       - mariadb-board-data:/var/lib/mysql
+    networks:
+      - enterprise-network
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MariaDB Database (Admin Service용)
+  mariadb-admin:
+    image: mariadb:10.11
+    container_name: mariadb-admin
+    environment:
+      MYSQL_DATABASE: admin-db
+      MYSQL_USER: rozeta
+      MYSQL_PASSWORD: rozeta123
+      MYSQL_ROOT_PASSWORD: maria123
+    ports:
+      - "13310:3306"
+    volumes:
+      - mariadb-admin-data:/var/lib/mysql
     networks:
       - enterprise-network
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
@@ -169,7 +185,6 @@ services:
     container_name: user-service
     ports:
       - "8081:8081"
-      # - "8081-8083:8081"  # 다중 서버 운영 : 포트 범위 - 자동 스케일링
     environment:
       SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-user:3306/user-db?useUnicode=true&characterEncoding=UTF-8
       SPRING_DATASOURCE_USERNAME: rozeta
@@ -271,6 +286,32 @@ services:
         condition: service_started
     restart: on-failure
 
+  # Admin Service
+  admin-service:
+    build:
+      context: ./backend/admin-service
+      dockerfile: Dockerfile
+      cache_from:
+        - admin-service:latest
+    image: admin-service:latest
+    container_name: admin-service
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-admin:3306/admin-db?useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: rozeta
+      SPRING_DATASOURCE_PASSWORD: rozeta123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - enterprise-network
+    depends_on:
+      mariadb-admin:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    restart: on-failure
+
   # API Gateway
   api-gateway:
     build:
@@ -296,6 +337,8 @@ services:
       order-service:
         condition: service_started
       board-service:
+        condition: service_started
+      admin-service:
         condition: service_started
     restart: on-failure
 
@@ -325,3 +368,4 @@ volumes:
   mariadb-product-data:
   mariadb-order-data:
   mariadb-board-data:
+  mariadb-admin-data:

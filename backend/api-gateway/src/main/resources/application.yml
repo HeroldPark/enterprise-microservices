@@ -69,6 +69,13 @@ gateway:
         - PUT
         - DELETE
 
+    # ⭐ Admin Service 설정 (새로 추가)
+    admin:
+      service-uri: lb://admin-service
+      api-path: /api/menus/**
+      require-auth: true
+      admin-only: true
+
     # Payment Service 추가
     payment:
       service-uri: lb://payment-service
@@ -107,6 +114,10 @@ gateway:
     authenticated-paths:
       boards-write:
         - /api/boards/**  # POST, PUT, DELETE 시 인증 필요
+      
+      # ⭐ Admin 경로 (ADMIN 권한 필요)
+      admin-menus:
+        - /api/menus/**  # 메뉴 관리는 ADMIN만 가능
 
 # Eureka 설정
 eureka:
@@ -201,6 +212,8 @@ gateway:
     authenticated-paths:
       orders:
         - /api/orders/**
+      admin-menus:
+        - /api/menus/**
 
 logging:
   level:
@@ -222,6 +235,9 @@ gateway:
     authenticate-all: true
     public-paths:
       orders: []
+    authenticated-paths:
+      admin-menus:
+        - /api/menus/**
 
 logging:
   level:

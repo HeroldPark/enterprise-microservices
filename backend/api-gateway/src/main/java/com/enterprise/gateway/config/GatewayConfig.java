@@ -123,6 +123,20 @@ public class GatewayConfig {
                                 new JwtAuthenticationFilter.Config(false))))
                 .uri(routeProperties.getBoard().getServiceUri()));
         
+        // ⭐⭐⭐ Admin Service Routes (메뉴 관리 - ADMIN 권한 필요) ⭐⭐⭐
+        routes.route("admin-service", r -> r
+                .path(routeProperties.getAdmin().getApiPath())  // /api/menus/**
+                .filters(f -> f
+                        .stripPrefix(routeProperties.getStripPrefix())  // /api 제거 → /menus
+                        .filter(jwtAuthenticationFilter.apply(
+                                new JwtAuthenticationFilter.Config(
+                                        routeProperties.getAdmin().isRequireAuth()))))  // 인증 필수
+                .uri(routeProperties.getAdmin().getServiceUri()));  // lb://admin-service
+        
+        log.info("✅ Admin Service route configured: {} -> {}", 
+                routeProperties.getAdmin().getApiPath(), 
+                routeProperties.getAdmin().getServiceUri());
+        
         return routes.build();
     }
 }

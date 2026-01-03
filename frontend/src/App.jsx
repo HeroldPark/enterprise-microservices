@@ -26,16 +26,17 @@ import BoardDetail from './components/board/pages/BoardDetail'
 import BoardCreate from './components/board/pages/BoardCreate'
 import BoardEdit from './components/board/pages/BoardEdit'
 
-// Model pages (새로 추가)
+// Model pages
 import IsolationForest from './components/models/pages/IsolationForest'
 import LSTM from './components/models/pages/LSTM'
 import GRU from './components/models/pages/GRU'
 import RandomForest from './components/models/pages/RandomForest'
 import XGBoost from './components/models/pages/XGBoost'
 
-// Admin pages (새로 추가)
+// Admin pages
 import AdminPanel from './components/admin/pages/AdminPanel'
 import UserManagement from './components/admin/pages/UserManagement'
+import MenuManagement from './components/admin/pages/MenuManagement'
 
 import SystemSettings from './components/system/SystemSettings'
 import ModelConfigs from './components/models/ModelConfigs'
@@ -173,6 +174,16 @@ function App() {
               element={
                 <RoleBasedRoute requiredRole={ROLES.ADMIN}>
                   <UserManagement />
+                </RoleBasedRoute>
+              }
+            />
+
+            {/* 메뉴 관리 - ADMIN만 접근 가능 */}
+            <Route
+              path="/admin/menus"
+              element={
+                <RoleBasedRoute requiredRole={ROLES.ADMIN}>
+                  <MenuManagement />
                 </RoleBasedRoute>
               }
             />

@@ -1,0 +1,49 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: admin-service
+  
+  # MariaDB Database 설정
+  datasource:
+    url: jdbc:mariadb://localhost:13310/admin-db?useUnicode=true&characterEncoding=UTF-8
+    username: rozeta
+    password: rozeta123
+    driver-class-name: org.mariadb.jdbc.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MariaDBDialect
+
+# JWT 설정 (Gateway와 동일해야 함!)
+jwt:
+  secret: your-secret-key-must-be-at-least-256-bits-long-for-HS256-algorithm
+  expiration: 86400000  # 24시간
+  
+# Eureka Client 설정
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    instance-id: ${spring.application.name}:${server.port}
+
+# Actuator 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

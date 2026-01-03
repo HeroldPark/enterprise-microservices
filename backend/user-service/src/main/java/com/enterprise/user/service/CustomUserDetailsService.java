@@ -1,4 +1,4 @@
-package com.enterprise.user.security;
+package com.enterprise.user.service;
 
 import com.enterprise.user.entity.User;
 import com.enterprise.user.repository.UserRepository;
