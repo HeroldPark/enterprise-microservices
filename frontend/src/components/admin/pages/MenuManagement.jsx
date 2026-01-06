@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Plus, Edit, Trash2, GripVertical, ChevronDown, ChevronUp } from 'lucide-react'
-import menuApi from '../../api/menuApi'
+import menuApi from '../../menu/menuApi'
 import MenuForm from '../../menu/MenuForm'
 import { ROLES } from '../../menu/menuPermissions'
 

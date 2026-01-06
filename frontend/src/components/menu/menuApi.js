@@ -1,6 +1,6 @@
 import api from '../app/api'
 
-const MENU_API_BASE = '/menus'
+const MENU_API_BASE = '/admin/menus'
 
 /**
  * 메뉴 관리 API 서비스
@@ -17,6 +17,21 @@ const menuApi = {
     } catch (error) {
       console.error('메뉴 조회 실패:', error)
       throw error
+    }
+  },
+
+  /**
+   * 메뉴 트리 구조 조회 (계층 구조)
+   * @returns {Promise} 트리 구조의 메뉴 목록
+   */
+  getMenuTree: async () => {
+    try {
+      const response = await api.get(`${MENU_API_BASE}/tree`)
+      return response.data
+    } catch (error) {
+      console.error('메뉴 트리 조회 실패:', error)
+      // 에러 시 빈 배열 반환
+      return []
     }
   },
 
@@ -103,7 +118,7 @@ const menuApi = {
    */
   updateMenuOrder: async (menuOrders) => {
     try {
-      const response = await api.put(`${MENU_API_BASE}/reorder`, menuOrders)
+      const response = await api.patch(`${MENU_API_BASE}/order`, menuOrders)
       return response.data
     } catch (error) {
       console.error('메뉴 순서 변경 실패:', error)

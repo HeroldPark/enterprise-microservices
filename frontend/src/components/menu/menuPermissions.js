@@ -13,25 +13,33 @@ export const menuItems = [
     name: 'Home',
     path: '/',
     icon: 'Home',
-    roles: [ROLES.GUEST, ROLES.USER, ROLES.MANAGER, ROLES.ADMIN], // 모든 사용자 접근 가능
+    roles: [ROLES.GUEST, ROLES.USER, ROLES.MANAGER, ROLES.ADMIN],
     order: 1
+  },
+  {
+    id: 'dashboard',  // ← 추가된 Dashboard 메뉴
+    name: 'Dashboard',
+    path: '/dashboard',
+    icon: 'BarChart',
+    roles: [ROLES.GUEST, ROLES.USER, ROLES.MANAGER, ROLES.ADMIN], // 모든 사용자 접근 가능
+    order: 2
   },
   {
     id: 'boards',
     name: 'Boards',
     path: '/boards',
     icon: 'MessageSquare',
-    roles: [ROLES.GUEST, ROLES.USER, ROLES.MANAGER, ROLES.ADMIN], // 모든 사용자 접근 가능
-    order: 2
+    roles: [ROLES.GUEST, ROLES.USER, ROLES.MANAGER, ROLES.ADMIN],
+    order: 3  // ← 순서 변경 (2 → 3)
   },
   {
     id: 'models',
     name: 'Models',
-    path: null, // 드롭다운이므로 직접 경로 없음
+    path: null,
     icon: 'Brain',
-    roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN], // USER, ADMIN만 접근 가능
+    roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN],
     isDropdown: true,
-    order: 3,
+    order: 4,  // ← 순서 변경 (3 → 4)
     subItems: [
       {
         id: 'isolation-forest',
@@ -95,17 +103,17 @@ export const menuItems = [
     name: 'Products',
     path: '/products',
     icon: 'Package',
-    roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN], // USER, ADMIN만 접근 가능
-    order: 4
+    roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN],
+    order: 5  // ← 순서 변경 (4 → 5)
   },
   {
     id: 'orders',
     name: 'Orders',
     path: '/orders',
     icon: 'ShoppingCart',
-    roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN], // USER, ADMIN만 접근 가능
-    order: 5,
-    requiresAuth: true // 로그인 필수
+    roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN],
+    order: 6,  // ← 순서 변경 (5 → 6)
+    requiresAuth: true
   },
   {
     id: 'demo',
@@ -113,28 +121,30 @@ export const menuItems = [
     path: '/demo',
     icon: 'Sparkles',
     roles: [ROLES.ADMIN],
-    order: 6
+    order: 7  // ← 순서 변경 (6 → 7)
   },
   {
     id: 'profile',
     name: 'Profile',
     path: '/profile',
     icon: 'User',
-    roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN], // USER, ADMIN만 접근 가능
-    order: 7,
-    requiresAuth: true, // 로그인 필수
-    showUsername: true // 사용자 이름 표시
+    roles: [ROLES.USER, ROLES.MANAGER, ROLES.ADMIN],
+    order: 8,  // ← 순서 변경 (7 → 8)
+    requiresAuth: true,
+    showUsername: true
   },
   {
     id: 'admin',
     name: 'Admin Panel',
     path: '/admin',
     icon: 'Shield',
-    roles: [ROLES.MANAGER, ROLES.ADMIN], // ADMIN만 접근 가능
-    order: 8,
+    roles: [ROLES.MANAGER, ROLES.ADMIN],
+    order: 9,  // ← 순서 변경 (8 → 9)
     requiresAuth: true
   }
 ]
+
+// ... 나머지 코드는 동일 ...
 
 // 인증 관련 메뉴
 export const authMenuItems = {

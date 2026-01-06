@@ -47,5 +47,9 @@ public class SecurityPathProperties {
         private List<String> boardsWrite = new ArrayList<>(List.of(
             "/api/boards/**"
         ));
+
+        private List<String> admins = new ArrayList<>(List.of(
+            "/api/admin/menus/**"
+        ));
     }
 }

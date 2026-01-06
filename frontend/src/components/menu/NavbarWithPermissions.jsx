@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../app/authStore'
 import { 
   ShoppingCart, User, LogOut, Home, Package, 
-  MessageSquare, ChevronDown, Shield, Brain, Sparkles
+  MessageSquare, ChevronDown, Shield, Brain, Sparkles,
+  BarChart  // ← Dashboard 아이콘 추가
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
@@ -31,6 +32,7 @@ const Navbar = () => {
   // 아이콘 컴포넌트 매핑
   const iconComponents = {
     Home,
+    BarChart,  // ← Dashboard 아이콘 추가
     Package,
     MessageSquare,
     ShoppingCart,
@@ -45,6 +47,9 @@ const Navbar = () => {
     const IconComponent = iconComponents[iconName]
     return IconComponent ? <IconComponent className="h-5 w-5" /> : null
   }
+
+  // ... 나머지 코드는 동일 ...
+
 
   return (
     <motion.nav 

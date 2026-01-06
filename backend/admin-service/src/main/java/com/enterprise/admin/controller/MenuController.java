@@ -17,7 +17,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/menus")
+@RequestMapping("/admin/menus")
 @RequiredArgsConstructor
 @Tag(name = "Menu Management", description = "메뉴 관리 API")
 public class MenuController {
@@ -27,7 +27,7 @@ public class MenuController {
     @GetMapping
     @Operation(summary = "모든 메뉴 조회", description = "시스템에 등록된 모든 메뉴를 조회합니다.")
     public ResponseEntity<List<MenuDto.Response>> getAllMenus() {
-        log.info("GET /api/menus - 모든 메뉴 조회 요청");
+        log.info("GET /admin/menus - 모든 메뉴 조회 요청");
         List<MenuDto.Response> menus = menuService.getAllMenus();
         return ResponseEntity.ok(menus);
     }
@@ -36,7 +36,7 @@ public class MenuController {
     @Operation(summary = "특정 메뉴 조회", description = "ID로 특정 메뉴를 조회합니다.")
     public ResponseEntity<MenuDto.Response> getMenuById(
             @Parameter(description = "메뉴 ID") @PathVariable String id) {
-        log.info("GET /api/menus/{} - 메뉴 조회 요청", id);
+        log.info("GET /admin/menus/{} - 메뉴 조회 요청", id);
         MenuDto.Response menu = menuService.getMenuById(id);
         return ResponseEntity.ok(menu);
     }
@@ -45,7 +45,7 @@ public class MenuController {
     @Operation(summary = "권한별 메뉴 조회", description = "특정 권한으로 필터링된 메뉴를 조회합니다.")
     public ResponseEntity<List<MenuDto.Response>> getMenusByRole(
             @Parameter(description = "사용자 권한 (GUEST, USER, MANAGER, ADMIN)") @PathVariable String role) {
-        log.info("GET /api/menus/role/{} - 권한별 메뉴 조회 요청", role);
+        log.info("GET /admin/menus/role/{} - 권한별 메뉴 조회 요청", role);
         List<MenuDto.Response> menus = menuService.getMenusByRole(role);
         return ResponseEntity.ok(menus);
     }
@@ -55,7 +55,7 @@ public class MenuController {
     @Operation(summary = "새 메뉴 생성", description = "새로운 메뉴를 생성합니다. (ADMIN 권한 필요)")
     public ResponseEntity<MenuDto.Response> createMenu(
             @Valid @RequestBody MenuDto.CreateRequest request) {
-        log.info("POST /api/menus - 메뉴 생성 요청: {}", request.getId());
+        log.info("POST /admin/menus - 메뉴 생성 요청: {}", request.getId());
         MenuDto.Response menu = menuService.createMenu(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(menu);
     }
@@ -66,7 +66,7 @@ public class MenuController {
     public ResponseEntity<MenuDto.Response> updateMenu(
             @Parameter(description = "메뉴 ID") @PathVariable String id,
             @Valid @RequestBody MenuDto.UpdateRequest request) {
-        log.info("PUT /api/menus/{} - 메뉴 수정 요청", id);
+        log.info("PUT /admin/menus/{} - 메뉴 수정 요청", id);
         MenuDto.Response menu = menuService.updateMenu(id, request);
         return ResponseEntity.ok(menu);
     }
@@ -76,7 +76,7 @@ public class MenuController {
     @Operation(summary = "메뉴 삭제", description = "메뉴를 삭제합니다. (ADMIN 권한 필요)")
     public ResponseEntity<Void> deleteMenu(
             @Parameter(description = "메뉴 ID") @PathVariable String id) {
-        log.info("DELETE /api/menus/{} - 메뉴 삭제 요청", id);
+        log.info("DELETE /admin/menus/{} - 메뉴 삭제 요청", id);
         menuService.deleteMenu(id);
         return ResponseEntity.noContent().build();
     }
@@ -86,7 +86,7 @@ public class MenuController {
     @Operation(summary = "메뉴 순서 변경", description = "여러 메뉴의 순서를 일괄 변경합니다. (ADMIN 권한 필요)")
     public ResponseEntity<Void> updateMenuOrder(
             @Valid @RequestBody List<MenuDto.MenuOrderRequest> orderRequests) {
-        log.info("PUT /api/menus/reorder - 메뉴 순서 변경 요청: {} 건", orderRequests.size());
+        log.info("PUT /admin/menus/reorder - 메뉴 순서 변경 요청: {} 건", orderRequests.size());
         menuService.updateMenuOrder(orderRequests);
         return ResponseEntity.ok().build();
     }
@@ -97,7 +97,7 @@ public class MenuController {
     public ResponseEntity<MenuDto.Response> createSubMenu(
             @Parameter(description = "부모 메뉴 ID") @PathVariable String parentMenuId,
             @Valid @RequestBody MenuDto.SubMenuItemDto subMenuDto) {
-        log.info("POST /api/menus/{}/submenu - 서브메뉴 생성 요청", parentMenuId);
+        log.info("POST /admin/menus/{}/submenu - 서브메뉴 생성 요청", parentMenuId);
         MenuDto.Response menu = menuService.createSubMenu(parentMenuId, subMenuDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(menu);
     }
@@ -109,7 +109,7 @@ public class MenuController {
             @Parameter(description = "부모 메뉴 ID") @PathVariable String parentMenuId,
             @Parameter(description = "서브메뉴 ID") @PathVariable String subMenuId,
             @Valid @RequestBody MenuDto.SubMenuItemDto subMenuDto) {
-        log.info("PUT /api/menus/{}/submenu/{} - 서브메뉴 수정 요청", parentMenuId, subMenuId);
+        log.info("PUT /admin/menus/{}/submenu/{} - 서브메뉴 수정 요청", parentMenuId, subMenuId);
         MenuDto.Response menu = menuService.updateSubMenu(parentMenuId, subMenuId, subMenuDto);
         return ResponseEntity.ok(menu);
     }
@@ -120,7 +120,7 @@ public class MenuController {
     public ResponseEntity<MenuDto.Response> deleteSubMenu(
             @Parameter(description = "부모 메뉴 ID") @PathVariable String parentMenuId,
             @Parameter(description = "서브메뉴 ID") @PathVariable String subMenuId) {
-        log.info("DELETE /api/menus/{}/submenu/{} - 서브메뉴 삭제 요청", parentMenuId, subMenuId);
+        log.info("DELETE /admin/menus/{}/submenu/{} - 서브메뉴 삭제 요청", parentMenuId, subMenuId);
         MenuDto.Response menu = menuService.deleteSubMenu(parentMenuId, subMenuId);
         return ResponseEntity.ok(menu);
     }

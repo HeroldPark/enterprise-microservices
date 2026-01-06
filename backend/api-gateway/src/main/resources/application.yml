@@ -72,7 +72,7 @@ gateway:
     # ⭐ Admin Service 설정 (새로 추가)
     admin:
       service-uri: lb://admin-service
-      api-path: /api/menus/**
+      api-path: /api/admin/menus/**
       require-auth: true
       admin-only: true
 
@@ -117,7 +117,7 @@ gateway:
       
       # ⭐ Admin 경로 (ADMIN 권한 필요)
       admin-menus:
-        - /api/menus/**  # 메뉴 관리는 ADMIN만 가능
+        - /api/admin/menus/**  # 메뉴 관리는 ADMIN만 가능
 
 # Eureka 설정
 eureka:
@@ -213,7 +213,7 @@ gateway:
       orders:
         - /api/orders/**
       admin-menus:
-        - /api/menus/**
+        - /api/admin/menus/**
 
 logging:
   level:
@@ -237,7 +237,7 @@ gateway:
       orders: []
     authenticated-paths:
       admin-menus:
-        - /api/menus/**
+        - /api/admin/menus/**
 
 logging:
   level:

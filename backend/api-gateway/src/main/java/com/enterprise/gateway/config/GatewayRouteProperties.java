@@ -55,7 +55,7 @@ public class GatewayRouteProperties {
     @Data
     public static class AdminServiceConfig {
         private String serviceUri = "lb://admin-service";
-        private String apiPath = "/api/menus/**";
+        private String apiPath = "/api/admin/menus/**";
         private boolean requireAuth = true;
         private boolean adminOnly = true;
     }
