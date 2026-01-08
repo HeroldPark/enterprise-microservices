@@ -142,8 +142,11 @@ public class UserManagementController {
     @GetMapping("/stats")
     @Operation(summary = "사용자 통계", description = "전체/권한별/상태별 사용자 통계")
     public ResponseEntity<Map<String, Object>> getUserStats() {
+
         log.info("GET /admin/users/stats");
+        
         Map<String, Object> stats = userManagementService.getUserStats();
         return ResponseEntity.ok(stats);
     }
+
 }

@@ -1,6 +1,6 @@
-package com.enterprise.user.dto;
+package com.enterprise.admin.dto;
 
-import com.enterprise.user.entity.ModelConfig;
+import com.enterprise.admin.entity.ModelConfig;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

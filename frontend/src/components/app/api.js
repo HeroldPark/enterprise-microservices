@@ -33,13 +33,13 @@ api.interceptors.request.use(
       }
     }
     
-    console.log('=== API REQUEST ===')
-    console.log('Token:', token ? token.substring(0, 20) + '...' : 'NO TOKEN')
-    console.log('URL:', config.url)
+    console.log('🔑 [api] === API REQUEST ===')
+    console.log('🔍 [api] Token:', token ? token : 'NO TOKEN')
+    console.log('🔍 [api] URL:', config.url)
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
-      console.log('Authorization header set')
+      console.log('🔍 [api] Authorization header set')
     } else {
       console.log('NO TOKEN - Authorization header NOT set')
     }

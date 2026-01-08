@@ -215,8 +215,10 @@ export const canAccessMenu = (menuId, userRole = ROLES.GUEST, isAuthenticated = 
   
   if (!menuItem) return false
   
+  // 권한 확인
   const hasRole = menuItem.roles.includes(userRole)
   
+  // 인증 필요 메뉴 확인
   if (menuItem.requiresAuth && !isAuthenticated) {
     return false
   }

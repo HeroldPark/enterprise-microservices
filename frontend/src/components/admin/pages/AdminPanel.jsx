@@ -1,16 +1,117 @@
-import { useState } from 'react'
-import { Users, Menu, Settings, BarChart, Database, Shield } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Users, Menu, Settings, BarChart, Database, Shield, RefreshCw, AlertCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import adminService from '../services/AdminService'
 
 const AdminPanel = () => {
   const navigate = useNavigate()
-  const [stats] = useState({
-    totalUsers: 1234,
-    activeUsers: 856,
-    totalMenus: 12,
-    totalBoards: 456
+  
+  // 상태 관리
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    loginUsers: 0,
+    totalMenus: 0,
+    totalBoards: 0
   })
+  const [recentActivities, setRecentActivities] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
+  // 데이터 로딩
+  useEffect(() => {
+    loadDashboardData()
+  }, [])
+
+  /**
+   * 대시보드 데이터 로딩
+   */
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // 방법 1: 통합 API가 있는 경우
+      try {
+        const dashboardData = await adminService.getDashboardStats()
+        setStats({
+          totalUsers: dashboardData.totalUsers || 0,
+          activeUsers: dashboardData.activeUsers || 0,
+          loginUsers: dashboardData.loginUsers || 0,
+          totalMenus: dashboardData.totalMenus || 0,
+          totalBoards: dashboardData.totalBoards || 0
+        })
+
+        console.log('📦 [AdminPanel] dashboardData: ', dashboardData)
+        
+        if (dashboardData.recentActivities) {
+          setRecentActivities(dashboardData.recentActivities)
+        }
+      } catch (dashboardError) {
+        // 방법 2: 통합 API가 없는 경우, 개별 API 호출
+        console.warn('⚠️ 통합 API 사용 불가, 개별 API 호출:', dashboardError)
+        // await loadStatsIndividually()
+      }
+
+    } catch (error) {
+      console.error('❌ 대시보드 데이터 로딩 실패:', error)
+      setError('데이터를 불러오는데 실패했습니다.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  /**
+   * 개별 API 호출로 통계 데이터 로딩
+   */
+  const loadStatsIndividually = async () => {
+    try {
+      // 병렬로 모든 통계 API 호출
+      const [userStats, menuStats, boardStats, activities] = await Promise.allSettled([
+        adminService.getUserStats(),
+        adminService.getMenuStats(),
+        adminService.getBoardStats(),
+        adminService.getRecentActivities(5)
+      ])
+
+      // 사용자 통계
+      if (userStats.status === 'fulfilled') {
+        setStats(prev => ({
+          ...prev,
+          totalUsers: userStats.value.totalUsers || 0,
+          activeUsers: userStats.value.activeUsers || 0,
+          loginUsers: userStats.value.loginUsers || 0
+        }))
+      }
+
+      // 메뉴 통계
+      if (menuStats.status === 'fulfilled') {
+        setStats(prev => ({
+          ...prev,
+          totalMenus: menuStats.value.totalMenus || 0
+        }))
+      }
+
+      // 게시판 통계
+      if (boardStats.status === 'fulfilled') {
+        setStats(prev => ({
+          ...prev,
+          totalBoards: boardStats.value.totalBoards || 0
+        }))
+      }
+
+      // 최근 활동
+      if (activities.status === 'fulfilled') {
+        setRecentActivities(activities.value || [])
+      }
+
+    } catch (error) {
+      console.error('❌ 개별 통계 로딩 실패:', error)
+      throw error
+    }
+  }
+
+  // 관리 기능 카드 설정
   const adminCards = [
     {
       title: '사용자 관리',
@@ -18,8 +119,8 @@ const AdminPanel = () => {
       icon: Users,
       color: 'bg-blue-500',
       path: '/admin/users',
-      stat: stats.totalUsers,
-      statLabel: '전체 사용자'
+      stat: stats.loginUsers,
+      statLabel: '현재 사용자'
     },
     {
       title: '메뉴 관리',
@@ -50,6 +151,7 @@ const AdminPanel = () => {
     }
   ]
 
+  // 빠른 통계 설정
   const quickStats = [
     {
       label: '전체 사용자',
@@ -65,6 +167,13 @@ const AdminPanel = () => {
       color: 'text-green-600',
       bgColor: 'bg-green-100'
     },
+    // {
+    //   label: '현재 사용자',
+    //   value: stats.loginUsers,
+    //   icon: Shield,
+    //   color: 'text-green-600',
+    //   bgColor: 'bg-green-100'
+    // },
     {
       label: '등록된 메뉴',
       value: stats.totalMenus,
@@ -81,22 +190,68 @@ const AdminPanel = () => {
     }
   ]
 
+  // 로딩 상태
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col items-center justify-center py-20">
+          <RefreshCw className="animate-spin text-blue-500 mb-4" size={48} />
+          <p className="text-gray-600 text-lg">대시보드 데이터를 불러오는 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 에러 상태
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <AlertCircle className="text-red-500" size={24} />
+            <h3 className="text-red-800 font-semibold text-lg">데이터 로딩 실패</h3>
+          </div>
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={loadDashboardData}
+            className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
+          >
+            <RefreshCw size={16} />
+            다시 시도
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-7xl mx-auto">
       {/* 헤더 */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">관리자 패널</h1>
-        <p className="text-gray-600">시스템 전반을 관리하고 모니터링합니다.</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">관리자 패널</h1>
+          <p className="text-gray-600">시스템 전반을 관리하고 모니터링합니다.</p>
+        </div>
+        <button
+          onClick={loadDashboardData}
+          className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+          title="데이터 새로고침"
+        >
+          <RefreshCw size={16} />
+          새로고침
+        </button>
       </div>
 
       {/* 빠른 통계 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {quickStats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-lg shadow p-6">
+          <div key={index} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-800">{stat.value.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-gray-800">
+                  {stat.value.toLocaleString()}
+                </p>
               </div>
               <div className={`${stat.bgColor} p-3 rounded-lg`}>
                 <stat.icon className={stat.color} size={24} />
@@ -123,7 +278,9 @@ const AdminPanel = () => {
                   </div>
                   {card.stat !== null && (
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-gray-800">{card.stat}</p>
+                      <p className="text-2xl font-bold text-gray-800">
+                        {card.stat.toLocaleString()}
+                      </p>
                       <p className="text-xs text-gray-600">{card.statLabel}</p>
                     </div>
                   )}
@@ -144,23 +301,29 @@ const AdminPanel = () => {
       {/* 최근 활동 */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-bold text-gray-800 mb-4">최근 시스템 활동</h2>
-        <div className="space-y-3">
-          {[
-            { action: '새로운 사용자 등록', user: 'user123', time: '5분 전' },
-            { action: '메뉴 수정', user: 'admin', time: '15분 전' },
-            { action: '모델 설정 변경', user: 'admin', time: '1시간 전' },
-            { action: '게시글 작성', user: 'user456', time: '2시간 전' },
-            { action: '사용자 권한 변경', user: 'admin', time: '3시간 전' }
-          ].map((activity, index) => (
-            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-800">{activity.action}</p>
-                <p className="text-xs text-gray-600">사용자: {activity.user}</p>
+        {recentActivities.length > 0 ? (
+          <div className="space-y-3">
+            {recentActivities.map((activity, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-800">
+                    {activity.action || activity.description}
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    사용자: {activity.user || activity.username || activity.userId || '알 수 없음'}
+                  </p>
+                </div>
+                <span className="text-xs text-gray-500">
+                  {activity.time || activity.createdAt || activity.timestamp}
+                </span>
               </div>
-              <span className="text-xs text-gray-500">{activity.time}</span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <p>최근 활동 내역이 없습니다.</p>
+          </div>
+        )}
       </div>
 
       {/* 시스템 정보 */}

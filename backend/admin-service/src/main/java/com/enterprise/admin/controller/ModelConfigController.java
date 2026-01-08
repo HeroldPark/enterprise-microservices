@@ -1,8 +1,8 @@
-package com.enterprise.user.controller;
+package com.enterprise.admin.controller;
 
-import com.enterprise.user.dto.ModelConfigDto;
-import com.enterprise.user.entity.ModelConfig;
-import com.enterprise.user.service.ModelConfigService;
+import com.enterprise.admin.dto.ModelConfigDto;
+import com.enterprise.admin.entity.ModelConfig;
+import com.enterprise.admin.service.ModelConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

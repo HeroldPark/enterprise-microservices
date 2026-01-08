@@ -44,12 +44,20 @@ public class SecurityPathProperties {
     
     @Data
     public static class AuthenticatedPaths {
-        private List<String> boardsWrite = new ArrayList<>(List.of(
-            "/api/boards/**"
-        ));
+        private List<String> user = new ArrayList<>(List.of(
+            "/api/users/**")
+        );
 
-        private List<String> admins = new ArrayList<>(List.of(
-            "/api/admin/menus/**"
+        private List<String> boardsWrite = new ArrayList<>(List.of(
+            "/api/boards/**")
+        );
+
+        private List<String> admin = new ArrayList<>(List.of(
+            "/api/admin/menus/**",
+            "/api/admin/settings/**",
+            "/api/admin/model-configs/**",
+            "/api/admin/dashboard/**"
         ));
+        
     }
 }

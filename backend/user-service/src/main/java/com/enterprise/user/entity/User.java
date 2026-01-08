@@ -46,6 +46,15 @@ public class User {
     
     @Column(nullable = false)
     private Boolean enabled = true;
+
+    /**
+     * 현재 로그인 상태
+     * - DB: NOT NULL
+     * - Java: 기본값 false
+     */
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean login = false;
     
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

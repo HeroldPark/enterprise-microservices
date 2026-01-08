@@ -1,4 +1,4 @@
-package com.enterprise.user.entity;
+package com.enterprise.admin.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -69,14 +69,12 @@ public class ModelConfig {
     /**
      * 정확도/성능 메트릭
      */
-    // @Column(precision = 10, scale = 4)
     @Column
     private Double accuracy;
     
     /**
      * F1 스코어
      */
-    // @Column(name = "f1_score", precision = 10, scale = 4)
     @Column
     private Double f1Score;
     
@@ -84,12 +82,14 @@ public class ModelConfig {
      * 기본 설정 여부 (모델별 하나만 기본)
      */
     @Column(name = "is_default")
+    @Builder.Default  // ✅ 추가: Builder 사용 시에도 기본값 적용
     private Boolean isDefault = false;
     
     /**
      * 활성화 여부
      */
     @Column(name = "is_active")
+    @Builder.Default  // ✅ 추가: Builder 사용 시에도 기본값 적용
     private Boolean isActive = true;
     
     /**
@@ -97,6 +97,7 @@ public class ModelConfig {
      */
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
+    @Builder.Default  // ✅ 추가: Builder 사용 시에도 기본값 적용
     private Environment environment = Environment.DEVELOPMENT;
     
     /**

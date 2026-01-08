@@ -39,11 +39,10 @@ gateway:
     # User Service 설정
     user:
       service-uri: lb://user-service
+      auth: /auth/**
       auth-path: /api/auth/**
       api-path: /api/users/**
       api-admin-path: /api/admin/users/**
-      api-system-path: /api/admin/settings/**
-      api-model-path: /api/admin/model-configs/**
 
     # Product Service 설정
     product:
@@ -73,6 +72,9 @@ gateway:
     admin:
       service-uri: lb://admin-service
       api-path: /api/admin/menus/**
+      api-system-path: /api/admin/settings/**
+      api-model-path: /api/admin/model-configs/**
+      api-dashboard-path: /api/admin/dashboard/**          # stats
       require-auth: true
       admin-only: true
 
@@ -91,8 +93,8 @@ gateway:
     # Public Paths (인증 불필요)
     public-paths:
       auth:
-        - /api/auth/**  # 로그인, 회원가입
-        - /auth/**
+        - /api/auth/login  # 로그인, 회원가입
+        - /api/auth/register
       
       products-get:
         - /api/products/**  # 상품 조회
@@ -112,12 +114,21 @@ gateway:
     
     # Authenticated Paths (인증 필요)
     authenticated-paths:
+      auth-logout:
+        - /api/auth/logout
+        
       boards-write:
         - /api/boards/**  # POST, PUT, DELETE 시 인증 필요
       
       # ⭐ Admin 경로 (ADMIN 권한 필요)
       admin-menus:
         - /api/admin/menus/**  # 메뉴 관리는 ADMIN만 가능
+
+      admin-settings:
+        - /api/admin/settings/**
+
+      admin-model-config:
+        - /api/admin/model-configs/**
 
 # Eureka 설정
 eureka:

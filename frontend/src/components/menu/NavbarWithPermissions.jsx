@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../app/authStore'
 import { 
   ShoppingCart, User, LogOut, Home, Package, 
   MessageSquare, ChevronDown, Shield, Brain, Sparkles,
-  BarChart  // ← Dashboard 아이콘 추가
+  BarChart, Lock, Bell  // ← 아이콘 추가
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
@@ -12,8 +12,11 @@ import {
   getFilteredSubItems, 
   ROLES 
 } from './menuPermissions'
+import menuApi from './menuApi'
 
 const Navbar = () => {
+  const [menuItems, setMenuItems] = useState([])
+  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
   const { isAuthenticated, user, logout } = useAuthStore()
   const [isModelsOpen, setIsModelsOpen] = useState(false)
@@ -23,33 +26,73 @@ const Navbar = () => {
     navigate('/login')
   }
 
-  // 사용자 권한 가져오기 (기본값: GUEST)
   const userRole = user?.role || ROLES.GUEST
 
-  // 권한에 따른 메뉴 필터링
-  const filteredMenuItems = getFilteredMenuItems(userRole, isAuthenticated)
-
-  // 아이콘 컴포넌트 매핑
+  // ✅ 아이콘 추가
   const iconComponents = {
     Home,
-    BarChart,  // ← Dashboard 아이콘 추가
+    BarChart,
     Package,
     MessageSquare,
     ShoppingCart,
     User,
     Shield,
     Brain,
-    Sparkles
+    Sparkles,
+    Lock,    // ← 추가
+    Bell     // ← 추가
   }
 
-  // 아이콘 렌더링 함수
   const renderIcon = (iconName) => {
     const IconComponent = iconComponents[iconName]
     return IconComponent ? <IconComponent className="h-5 w-5" /> : null
   }
 
-  // ... 나머지 코드는 동일 ...
+  useEffect(() => {
+    const loadMenus = async () => {
+      try {
+        setLoading(true)
+        const menus = await menuApi.getMenusByRole(userRole)
+        
+        console.log('🔍 DB에서 불러온 메뉴:', menus)
+        console.log('📊 메뉴 개수:', menus?.length)
+        console.log('👤 현재 유저 권한:', userRole)
+        console.log('✅ 인증 상태:', isAuthenticated)
+        
+        // 각 메뉴의 상세 정보 출력
+        menus?.forEach((menu, index) => {
+          console.log(`📋 메뉴 ${index}:`, {
+            id: menu.id,
+            name: menu.name,
+            path: menu.path,
+            roles: menu.roles,
+            requiresAuth: menu.requiresAuth,
+            isDropdown: menu.isDropdown
+          })
+        })
+        
+        setMenuItems(menus || [])
+      } catch (error) {
+        console.error('❌ DB 메뉴 로딩 실패, 기본 메뉴 사용:', error)
+        setMenuItems(getFilteredMenuItems(userRole, isAuthenticated))
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadMenus()
+  }, [userRole, isAuthenticated])
 
+  if (loading) {
+    return (
+      <nav className="bg-white shadow-lg relative z-50">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center h-16">
+            <div className="text-gray-400">Loading menu...</div>
+          </div>
+        </div>
+      </nav>
+    )
+  }
 
   return (
     <motion.nav 
@@ -73,14 +116,23 @@ const Navbar = () => {
           </Link>
 
           <div className="flex items-center space-x-6">
-            {/* 권한 기반 메뉴 렌더링 */}
-            {filteredMenuItems.map((menuItem) => {
+            {/* 🐛 디버깅: 메뉴 개수 표시 */}
+            <div className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+              메뉴: {menuItems.length}개
+            </div>
+
+            {/* ✅ DB에서 불러온 메뉴 렌더링 */}
+            {menuItems.map((menuItem, idx) => {
+              console.log(`🎨 렌더링 시도 - 메뉴 ${idx}:`, menuItem.id, menuItem.name)
+              
               // 드롭다운 메뉴
               if (menuItem.isDropdown) {
                 const filteredSubs = getFilteredSubItems(menuItem.subItems, userRole)
                 
-                // 서브 아이템이 없으면 렌더링 안함
-                if (filteredSubs.length === 0) return null
+                if (filteredSubs.length === 0) {
+                  console.log(`⏭️ 건너뜀 (서브메뉴 없음):`, menuItem.id)
+                  return null
+                }
 
                 return (
                   <div 
@@ -152,10 +204,13 @@ const Navbar = () => {
               }
 
               // 일반 메뉴
-              // 로그인 필수 메뉴이고 로그인되지 않은 경우 렌더링 안함
+              // 로그인 필수 메뉴이고 로그인되지 않은 경우 건너뛰기
               if (menuItem.requiresAuth && !isAuthenticated) {
+                console.log(`⏭️ 건너뜀 (로그인 필요):`, menuItem.id)
                 return null
               }
+
+              console.log(`✅ 렌더링 성공:`, menuItem.id)
 
               return (
                 <motion.div 
@@ -210,7 +265,7 @@ const Navbar = () => {
               </>
             )}
 
-            {/* 권한 표시 배지 (개발/테스트용) */}
+            {/* 권한 표시 배지 */}
             {user && (
               <div className="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-700">
                 {userRole}

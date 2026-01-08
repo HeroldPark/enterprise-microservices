@@ -1,8 +1,8 @@
-package com.enterprise.user.controller;
+package com.enterprise.admin.controller;
 
-import com.enterprise.user.dto.SystemSettingDto;
-import com.enterprise.user.entity.SystemSetting;
-import com.enterprise.user.service.SystemSettingService;
+import com.enterprise.admin.dto.SystemSettingDto;
+import com.enterprise.admin.entity.SystemSetting;
+import com.enterprise.admin.service.SystemSettingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

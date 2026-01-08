@@ -4,20 +4,15 @@ import {
   Home, Users, ShoppingCart, Package, Settings, 
   ChevronDown, ChevronRight, Menu as MenuIcon,
   BarChart, FileText, Shield, Database, X, Brain, LogOut, Sparkles,
-  Target, GitBranch, Zap, Trees, TrendingUp
+  Target, GitBranch, Zap, Trees, TrendingUp, Lock, Bell, Heart
 } from 'lucide-react'
-import { useAuthStore } from './authStore'  // ← authStore import 추가
-
-// 권한 상수 정의
-export const ROLES = {
-  GUEST: 'GUEST',
-  USER: 'USER',
-  MANAGER: 'MANAGER',
-  ADMIN: 'ADMIN'
-}
+import { useAuthStore } from './authStore'
+import menuApi from '../menu/menuApi'  // ← menuApi import 추가
+import { ROLES } from '../menu/menuPermissions'  // ← ROLES import 수정
 
 // 아이콘 매핑
 const iconMap = {
+  // 기존 아이콘
   'DashboardIcon': Home,
   'PeopleIcon': Users,
   'UsersIcon': Users,
@@ -34,13 +29,25 @@ const iconMap = {
   'ArticleIcon': FileText,
   'ComputerIcon': Settings,
   'TuneIcon': Settings,
+  
+  // Lucide 아이콘 (직접 이름 매핑)
+  'Home': Home,
   'Brain': Brain,
   'Sparkles': Sparkles,
   'Target': Target,
   'GitBranch': GitBranch,
   'Zap': Zap,
   'Trees': Trees,
-  'TrendingUp': TrendingUp
+  'TrendingUp': TrendingUp,
+  'BarChart': BarChart,
+  'Package': Package,
+  'MessageSquare': FileText,
+  'ShoppingCart': ShoppingCart,
+  'User': Users,
+  'Shield': Shield,
+  'Lock': Lock,
+  'Bell': Bell,
+  'Heart': Heart
 }
 
 // 권한별 한글 표시
@@ -65,142 +72,178 @@ const Sidebar = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
   
-  // authStore에서 사용자 정보 가져오기
   const { user, logout } = useAuthStore()
+  const userRole = user?.role || ROLES.GUEST
 
-  // 기본 메뉴 (폴백)
-  const getDefaultMenus = () => [
-    {
-      id: 'dashboard',
-      name: '대시보드',
-      path: '/dashboard',
-      icon: 'DashboardIcon',
-      children: []
-    },
-    {
-      id: 'admin',
-      name: '관리자 패널',
-      path: '/admin',
-      icon: 'ShieldIcon',
-      children: []
-    },
-    {
-      id: 'models',
-      name: 'Models',
-      path: null,
-      icon: 'Brain',
-      children: [
-        {
-          id: 'isolation-forest',
-          name: 'Isolation Forest',
-          path: '/models/isolation-forest',
-          icon: 'Target'
-        },
-        {
-          id: 'lstm',
-          name: 'LSTM',
-          path: '/models/lstm',
-          icon: 'GitBranch'
-        },
-        {
-          id: 'gru',
-          name: 'GRU',
-          path: '/models/gru',
-          icon: 'Zap'
-        },
-        {
-          id: 'random-forest',
-          name: 'Random Forest',
-          path: '/models/random-forest',
-          icon: 'Trees'
-        },
-        {
-          id: 'xgboost',
-          name: 'XGBoost',
-          path: '/models/xgboost',
-          icon: 'TrendingUp'
-        }
-      ]
-    },
-    {
-      id: 'products',
-      name: '상품 관리',
-      path: '/products',
-      icon: 'PackageIcon',
-      children: []
-    },
-    {
-      id: 'orders',
-      name: '주문 관리',
-      path: '/orders',
-      icon: 'ShoppingCartIcon',
-      children: []
-    },
-    {
-      id: 'demo',
-      name: 'Demo',
-      path: '/demo',
-      icon: 'Sparkles',
-      roles: [ROLES.ADMIN],
-      children: []
-    },
-    {
-      id: 'boards',
-      name: '게시판',
-      path: '/boards',
-      icon: 'FileText',
-      children: []
-    }
-  ]
-
-  // 메뉴 데이터 로드
+  // ✅ DB에서 메뉴 불러오기
   useEffect(() => {
-    console.log('🔧 [Sidebar] 컴포넌트 마운트됨')
-    console.log('👤 [Sidebar] 현재 사용자:', user)
-    
-    setMenus(getDefaultMenus())
-    setLoading(false)
-  }, [user])
-
-  const fetchMenus = async () => {
-    try {
-      setLoading(true)
-      console.log('📡 [Sidebar] 메뉴 API 호출 시작...')
-      
-      const data = getDefaultMenus()
-      console.log('✅ [Sidebar] 메뉴 데이터:', data)
-      
-      setMenus(data)
-    } catch (error) {
-      console.error('❌ [Sidebar] 메뉴 로드 실패:', error)
-      setMenus(getDefaultMenus())
-    } finally {
-      setLoading(false)
+    const loadMenus = async () => {
+      try {
+        setLoading(true)
+        console.log('🔧 [Sidebar] 메뉴 로딩 시작...')
+        console.log('👤 [Sidebar] 현재 유저:', user)
+        console.log('🔑 [Sidebar] 현재 권한:', userRole)
+        
+        // 1️⃣ 기본 메뉴 (하드코딩)
+        const defaultMenus = [
+          {
+            id: 'dashboard',
+            name: '대시보드',
+            path: '/dashboard',
+            icon: 'DashboardIcon',
+            children: []
+          },
+          {
+            id: 'admin',
+            name: '관리자 패널',
+            path: '/admin',
+            icon: 'ShieldIcon',
+            children: []
+          },
+          {
+            id: 'models',
+            name: 'Models',
+            path: null,
+            icon: 'Brain',
+            children: [
+              {
+                id: 'isolation-forest',
+                name: 'Isolation Forest',
+                path: '/models/isolation-forest',
+                icon: 'Target'
+              },
+              {
+                id: 'lstm',
+                name: 'LSTM',
+                path: '/models/lstm',
+                icon: 'GitBranch'
+              },
+              {
+                id: 'gru',
+                name: 'GRU',
+                path: '/models/gru',
+                icon: 'Zap'
+              },
+              {
+                id: 'random-forest',
+                name: 'Random Forest',
+                path: '/models/random-forest',
+                icon: 'Trees'
+              },
+              {
+                id: 'xgboost',
+                name: 'XGBoost',
+                path: '/models/xgboost',
+                icon: 'TrendingUp'
+              }
+            ]
+          },
+          {
+            id: 'products',
+            name: '상품 관리',
+            path: '/products',
+            icon: 'PackageIcon',
+            children: []
+          },
+          {
+            id: 'orders',
+            name: '주문 관리',
+            path: '/orders',
+            icon: 'ShoppingCartIcon',
+            children: []
+          },
+          {
+            id: 'demo',
+            name: 'Demo',
+            path: '/demo',
+            icon: 'Sparkles',
+            roles: [ROLES.ADMIN],
+            children: []
+          },
+          {
+            id: 'boards',
+            name: '게시판',
+            path: '/boards',
+            icon: 'FileText',
+            children: []
+          }
+        ]
+        
+        console.log('📋 [Sidebar] 기본 메뉴:', defaultMenus.length, '개')
+        
+        // 2️⃣ DB 메뉴 가져오기
+        try {
+          const dbMenus = await menuApi.getAllMenus()
+          console.log('📦 [Sidebar] DB 메뉴 (전체):', dbMenus)
+          
+          if (dbMenus && dbMenus.length > 0) {
+            // DB 메뉴 구조를 Sidebar 형식으로 변환
+            const convertedDbMenus = dbMenus.map(menu => ({
+              id: menu.id,
+              name: menu.name,
+              path: menu.path || null,
+              icon: menu.icon,
+              children: menu.subItems?.map(sub => ({
+                id: sub.id,
+                name: sub.name,
+                path: sub.path,
+                icon: sub.icon || 'MenuIcon'
+              })) || []
+            }))
+            
+            console.log('✅ [Sidebar] 변환된 DB 메뉴:', convertedDbMenus.length, '개')
+            
+            // 3️⃣ 기본 메뉴 + DB 메뉴 병합
+            const allMenus = [...defaultMenus, ...convertedDbMenus]
+            console.log('🎯 [Sidebar] 전체 메뉴:', allMenus.length, '개')
+            setMenus(allMenus)
+          } else {
+            console.warn('⚠️ [Sidebar] DB에 메뉴가 없습니다. 기본 메뉴만 사용')
+            setMenus(defaultMenus)
+          }
+        } catch (dbError) {
+          console.error('❌ [Sidebar] DB 메뉴 로딩 실패, 기본 메뉴만 사용:', dbError)
+          setMenus(defaultMenus)
+        }
+      } catch (error) {
+        console.error('❌ [Sidebar] 메뉴 로딩 실패:', error)
+        setMenus([])
+      } finally {
+        setLoading(false)
+      }
     }
-  }
+    
+    loadMenus()
+  }, [userRole])
 
   const toggleMenu = (menuId) => {
     console.log('🔄 [Sidebar] 메뉴 토글:', menuId)
-    setExpandedMenus(prev => {
-      const newState = {
-        ...prev,
-        [menuId]: !prev[menuId]
-      }
-      console.log('📊 [Sidebar] expandedMenus:', newState)
-      return newState
-    })
+    setExpandedMenus(prev => ({
+      ...prev,
+      [menuId]: !prev[menuId]
+    }))
   }
+
+  // 확장 상태 예시:
+  // expandedMenus = {
+  //   'models': true,    // Models 메뉴 확장됨
+  //   'settings': false  // Settings 메뉴 축소됨
+  // }
 
   const handleMenuClick = (menu) => {
     console.log('🖱️ [Sidebar] 메뉴 클릭:', menu.name)
-    console.log('📋 [Sidebar] menu.children:', menu.children)
     
+    // Case 1: 드롭다운 메뉴 (children 있음)
     if (menu.children && menu.children.length > 0) {
       console.log('✅ [Sidebar] 하위 메뉴 있음 - 토글 실행')
       toggleMenu(menu.id)
-    } else if (menu.path) {
+    } 
+    // Case 2: 링크 메뉴 (path 있음)
+    else if (menu.path) {
       console.log('🔗 [Sidebar] 페이지 이동:', menu.path)
       navigate(menu.path)
+
+      // 모바일에서는 메뉴 닫기
       if (window.innerWidth < 768) {
         onClose()
       }
@@ -220,6 +263,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
     return (
       <div>
+        {/* Case 1: 링크가 있는 메뉴 (일반 메뉴 또는 드롭다운 부모) */}
         {menu.path ? (
           <NavLink
             to={menu.path}
@@ -237,6 +281,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             )}
           </NavLink>
         ) : (
+          /* Case 2: 링크가 없는 메뉴 (드롭다운 전용) */
           <button
             onClick={() => handleMenuClick(menu)}
             className={`w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors ${
@@ -251,6 +296,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           </button>
         )}
 
+        {/* 하위 메뉴 (재귀적 렌더링) */}
         {hasChildren && isExpanded && (
           <div className="bg-gray-700">
             {menu.children.map(child => (
@@ -262,27 +308,23 @@ const Sidebar = ({ isOpen, onClose }) => {
     )
   }
 
-  // 사용자 이름의 첫 글자 추출 (아바타용)
   const getUserInitial = () => {
-    if (!user) return 'G'  // Guest
+    if (!user) return 'G'
     if (user.username) return user.username.charAt(0).toUpperCase()
     if (user.email) return user.email.charAt(0).toUpperCase()
-    return 'U'  // User
+    return 'U'
   }
 
-  // 표시할 사용자 이름
   const getDisplayName = () => {
     if (!user) return '게스트'
     return user.username || user.name || user.email?.split('@')[0] || '사용자'
   }
 
-  // 표시할 이메일 또는 역할
   const getDisplayInfo = () => {
     if (!user) return 'guest@example.com'
     return user.email || roleDisplayNames[user.role] || user.role || '사용자'
   }
 
-  // 헤더 타이틀 (권한별)
   const getHeaderTitle = () => {
     if (!user || !user.role) return 'System Panel'
     
@@ -300,7 +342,6 @@ const Sidebar = ({ isOpen, onClose }) => {
     }
   }
 
-  // 헤더 서브타이틀 (권한별)
   const getHeaderSubtitle = () => {
     if (!user || !user.role) return '시스템'
     
@@ -351,6 +392,15 @@ const Sidebar = ({ isOpen, onClose }) => {
           </button>
         </div>
 
+        {/* 🐛 디버깅: 메뉴 개수 표시 */}
+        {!loading && (
+          <div className="px-4 py-2 bg-blue-900 border-b border-blue-700">
+            <p className="text-blue-300 text-xs">
+              전체 메뉴: {menus.length}개
+            </p>
+          </div>
+        )}
+
         {/* 메뉴 리스트 */}
         <nav className="flex-1 overflow-y-auto py-4" style={{ height: 'calc(100vh - 8rem)' }}>
           {loading ? (
@@ -358,7 +408,9 @@ const Sidebar = ({ isOpen, onClose }) => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
               <p className="text-gray-400 text-sm">메뉴 로딩 중...</p>
             </div>
-          ) : menus.length === 0 ? (
+          ) 
+          /* 메뉴 없음 */
+          : menus.length === 0 ? (
             <div className="px-4 py-8">
               <div className="bg-yellow-900 bg-opacity-20 border border-yellow-500 rounded-lg p-4">
                 <p className="text-yellow-400 text-sm font-medium">메뉴가 없습니다</p>
@@ -367,7 +419,9 @@ const Sidebar = ({ isOpen, onClose }) => {
                 </p>
               </div>
             </div>
-          ) : (
+          ) 
+          /* 메뉴 렌더링 */
+          : (
             <div>
               {menus.map(menu => (
                 <MenuItem key={menu.id} menu={menu} />
@@ -379,14 +433,12 @@ const Sidebar = ({ isOpen, onClose }) => {
         {/* 푸터 - 사용자 정보 */}
         <div className="border-t border-gray-700 p-4">
           <div className="flex items-center gap-3 text-gray-400 text-sm">
-            {/* 아바타 */}
             <div className={`w-8 h-8 ${user?.role ? roleBadgeColors[user.role] : 'bg-gray-700'} rounded-full flex items-center justify-center`}>
               <span className="text-white font-semibold text-sm">
                 {getUserInitial()}
               </span>
             </div>
             
-            {/* 사용자 정보 */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <p className="text-white font-medium truncate">
@@ -403,7 +455,6 @@ const Sidebar = ({ isOpen, onClose }) => {
               </p>
             </div>
             
-            {/* 로그아웃 버튼 */}
             <button
               onClick={handleLogout}
               className="text-gray-400 hover:text-white transition-colors"

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -25,6 +26,16 @@ public class BoardController {
     
     private final BoardService boardService;
     
+    /**
+     * 게시판 통계 조회 (admin-service/StatsService에서 호출)
+     */
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Object>> getBoardStats() {
+        log.info("GET /boards/stats - 게시판 통계 조회 요청");
+        Map<String, Object> stats = boardService.getBoardStats();
+        return ResponseEntity.ok(stats);
+    }
+
     @PostMapping
     public ResponseEntity<BoardDto.Response> createBoard(@Valid @RequestBody BoardDto.CreateRequest request) {
         BoardDto.Response response = boardService.createBoard(request);

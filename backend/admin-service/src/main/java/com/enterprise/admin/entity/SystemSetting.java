@@ -1,4 +1,4 @@
-package com.enterprise.user.entity;
+package com.enterprise.admin.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -44,7 +44,8 @@ public class SystemSetting {
      * STRING, NUMBER, BOOLEAN, JSON, EMAIL, URL
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "value_type", nullable = false, length = 20)
+    @Column
+    @Builder.Default  // ✅ 추가: Builder 사용 시에도 기본값 적용
     private ValueType type = ValueType.STRING;
     
     /**
@@ -52,7 +53,8 @@ public class SystemSetting {
      * GENERAL, EMAIL, SECURITY, PAYMENT, NOTIFICATION
      */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
+    @Column
+    @Builder.Default  // ✅ 추가: Builder 사용 시에도 기본값 적용
     private Category category = Category.GENERAL;
     
     /**
@@ -70,29 +72,34 @@ public class SystemSetting {
     /**
      * 암호화 필요 여부 (비밀번호, API 키 등)
      */
-    @Column(name = "is_encrypted")
+    @Column
+    @Builder.Default  // ✅ 추가: Builder 사용 시에도 기본값 적용
     private Boolean isEncrypted = false;
     
     /**
      * 활성화 여부
      */
-    @Column(name = "is_active")
+    @Column
+    @Builder.Default  // ✅ 추가: Builder 사용 시에도 기본값 적용
     private Boolean isActive = true;
     
     /**
      * 마지막 수정자
      */
-    @Column(name = "updated_by")
+    @Column
     private String updatedBy;
     
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column
     private LocalDateTime createdAt;
     
     @UpdateTimestamp
-    @Column(name = "updated_at")
+    @Column
     private LocalDateTime updatedAt;
     
+    /**
+     * 설정 값 타입 열거형
+     */
     public enum ValueType {
         STRING,     // 일반 문자열
         NUMBER,     // 숫자
@@ -103,6 +110,9 @@ public class SystemSetting {
         PASSWORD    // 비밀번호 (암호화)
     }
     
+    /**
+     * 설정 카테고리 열거형
+     */
     public enum Category {
         GENERAL,        // 일반 설정
         EMAIL,          // 이메일 설정

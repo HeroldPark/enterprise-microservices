@@ -1,9 +1,9 @@
-package com.enterprise.user.service;
+package com.enterprise.admin.service;
 
-import com.enterprise.user.dto.ModelConfigDto;
-import com.enterprise.user.entity.ModelConfig;
-import com.enterprise.user.exception.ResourceNotFoundException;
-import com.enterprise.user.repository.ModelConfigRepository;
+import com.enterprise.admin.dto.ModelConfigDto;
+import com.enterprise.admin.entity.ModelConfig;
+import com.enterprise.admin.exception.ResourceNotFoundException;
+import com.enterprise.admin.repository.ModelConfigRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

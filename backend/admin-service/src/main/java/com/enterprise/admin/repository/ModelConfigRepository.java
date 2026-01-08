@@ -1,6 +1,6 @@
-package com.enterprise.user.repository;
+package com.enterprise.admin.repository;
 
-import com.enterprise.user.entity.ModelConfig;
+import com.enterprise.admin.entity.ModelConfig;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

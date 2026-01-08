@@ -9,8 +9,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -37,4 +42,15 @@ public class AuthController {
         AuthResponse response = userService.login(request);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Logout user")
+    public ResponseEntity<Map<String, Object>> logout(Authentication authentication) {
+        String username = authentication.getName();
+        log.info("POST /auth/logout - username: {}", username);
+        userService.logout(username);
+        return ResponseEntity.ok(Map.of("username", username, "logout", true));
+    }
+
 }

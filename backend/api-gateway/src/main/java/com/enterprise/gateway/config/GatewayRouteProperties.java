@@ -22,11 +22,10 @@ public class GatewayRouteProperties {
     @Data
     public static class UserServiceConfig {
         private String serviceUri = "lb://user-service";
+        private String auth = "/auth/**";
         private String authPath = "/api/auth/**";
         private String apiPath = "/api/users/**";
         private String apiAdminPath = "/api/admin/users/**";
-        private String apiSystemPath = "/api/admin/settings/**";
-        private String apiModelPath = "/api/admin/model-configs/**";
     }
     
     @Data
@@ -55,7 +54,10 @@ public class GatewayRouteProperties {
     @Data
     public static class AdminServiceConfig {
         private String serviceUri = "lb://admin-service";
-        private String apiPath = "/api/admin/menus/**";
+        private String apiPath = "/api/admin/menus/**";                 // /stats
+        private String apiSystemPath = "/api/admin/settings/**";
+        private String apiModelPath = "/api/admin/model-configs/**";
+        private String apiDashboardPath = "/api/admin/dashboard/**";    // /stats
         private boolean requireAuth = true;
         private boolean adminOnly = true;
     }

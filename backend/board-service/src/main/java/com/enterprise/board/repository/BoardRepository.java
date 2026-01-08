@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -25,4 +26,24 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     
     // 최신순 정렬
     List<Board> findTop10ByOrderByCreatedAtDesc();
+
+    /**
+     * 통계 조회용 메서드들
+     */
+    
+    // 특정 날짜 이후 생성된 게시글 수
+    @Query("SELECT COUNT(b) FROM Board b WHERE b.createdAt >= :startDate")
+    long countByCreatedAtAfter(@Param("startDate") LocalDateTime startDate);
+    
+    // 오늘 작성된 게시글 수
+    @Query("SELECT COUNT(b) FROM Board b WHERE DATE(b.createdAt) = CURRENT_DATE")
+    long countTodayBoards();
+    
+    // 작성자별 게시글 수
+    @Query("SELECT b.author, COUNT(b) FROM Board b GROUP BY b.author ORDER BY COUNT(b) DESC")
+    List<Object[]> countBoardsByAuthor();
+    
+    // 첨부파일이 있는 게시글 수
+    @Query("SELECT COUNT(DISTINCT b) FROM Board b JOIN b.attachments a")
+    long countBoardsWithAttachments();
 }

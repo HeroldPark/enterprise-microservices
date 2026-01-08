@@ -106,3 +106,12 @@ Dev/Prod 프로파일별 설정 예시 포함
 
 # 2026-01-06
   - 기능별 코드 정리
+
+# 2026-01-07
+  - 서버 사이드 코드 정리 : /admin/menus, /admin/settings, /admin/model-configs
+  - frontend : 메뉴 관리 등록 > 사이드 메뉴 아래 랜더링 되게 함.
+  - frontend AdminPanel의 모든 통계 API 호출
+
+# 2026-01-08
+  - 서비스 간 request/response 처리
+  - admin-service - user-service, board-service

@@ -19,7 +19,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -69,6 +71,7 @@ public class UserService {
         return new AuthResponse(token, userMapper.toDto(savedUser));
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         log.info("User login attempt: {}", request.getUsername());
         
@@ -82,6 +85,9 @@ public class UserService {
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + request.getUsername()));
         
+        // ✅ 로그인 성공 → users.login = 1
+        userRepository.updateLoginByUsername(user.getUsername(), true);
+
         // ⭐ Before: String token = jwtTokenProvider.generateToken(authentication.getName());
         // ⭐ After:
         String token = jwtTokenProvider.generateToken(
@@ -92,6 +98,12 @@ public class UserService {
         log.info("User logged in successfully: {} with role: {}", 
                 user.getUsername(), user.getRole());
         return new AuthResponse(token, userMapper.toDto(user));
+    }
+
+    @Transactional
+    public void logout(String username) {
+        // ✅ 로그아웃 → users.login = 0
+        userRepository.updateLoginByUsername(username, false);
     }
 
     public UserDto getUserById(Long id) {
@@ -145,4 +157,5 @@ public class UserService {
         userRepository.deleteById(id);
         log.info("User deleted successfully: {}", id);
     }
+
 }
