@@ -1,0 +1,68 @@
+server:
+  port: 8086
+spring:
+  application:
+    name: message-service
+  datasource:
+    url: jdbc:mariadb://mariadb-message:3306/message-db?useUnicode=true&characterEncoding=UTF-8
+    username: rozeta
+    password: rozeta123
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MariaDBDialect
+  cloud:
+    config:
+      enabled: false
+jwt:
+  secret: your-secret-key-must-be-at-least-256-bits-long-for-HS256-algorithm
+  expiration: 86400000
+eureka:
+  client:
+    enabled: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    instance-id: ${spring.application.name}:${server.port}
+microservices:
+  user-service:
+    url: http://user-service
+  board-service:
+    url: http://board-service
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+logging:
+  level:
+    com.enterprise.admin: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+cors:
+  allowed-origins:
+  - http://localhost:3000
+  - http://localhost:5173
+  allowed-methods:
+  - GET
+  - POST
+  - PUT
+  - DELETE
+  - PATCH
+  - OPTIONS
+  allowed-headers:
+  - '*'
+  allow-credentials: true

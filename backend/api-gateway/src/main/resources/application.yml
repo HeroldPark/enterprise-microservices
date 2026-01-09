@@ -39,7 +39,7 @@ gateway:
     # User Service 설정
     user:
       service-uri: lb://user-service
-      auth: /auth/**
+      # auth: /auth/**
       auth-path: /api/auth/**
       api-path: /api/users/**
       api-admin-path: /api/admin/users/**
@@ -78,6 +78,12 @@ gateway:
       require-auth: true
       admin-only: true
 
+    # ⭐ Message Service 설정
+    message:
+      service-uri: lb://message-service
+      api-path: /api/messages/**
+      require-auth: true
+      
     # Payment Service 추가
     payment:
       service-uri: lb://payment-service

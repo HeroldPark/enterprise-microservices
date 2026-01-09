@@ -4,7 +4,7 @@ import {
   Home, Users, ShoppingCart, Package, Settings, 
   ChevronDown, ChevronRight, Menu as MenuIcon,
   BarChart, FileText, Shield, Database, X, Brain, LogOut, Sparkles,
-  Target, GitBranch, Zap, Trees, TrendingUp, Lock, Bell, Heart
+  Target, GitBranch, Zap, Trees, TrendingUp, Lock, Bell, Heart, MessageSquare
 } from 'lucide-react'
 import { useAuthStore } from './authStore'
 import menuApi from '../menu/menuApi'  // ← menuApi import 추가
@@ -41,13 +41,14 @@ const iconMap = {
   'TrendingUp': TrendingUp,
   'BarChart': BarChart,
   'Package': Package,
-  'MessageSquare': FileText,
+  'FileText': FileText,
   'ShoppingCart': ShoppingCart,
   'User': Users,
   'Shield': Shield,
   'Lock': Lock,
   'Bell': Bell,
-  'Heart': Heart
+  'Heart': Heart,
+  'MessageSquare': MessageSquare
 }
 
 // 권한별 한글 표시
@@ -165,6 +166,13 @@ const Sidebar = ({ isOpen, onClose }) => {
             name: '게시판',
             path: '/boards',
             icon: 'FileText',
+            children: []
+          },
+          {
+            id: 'messages',
+            name: '메시지',
+            path: '/messages/inbox',
+            icon: 'MessageSquare',
             children: []
           }
         ]

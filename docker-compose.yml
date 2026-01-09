@@ -131,6 +131,28 @@ services:
       timeout: 5s
       retries: 5
 
+  # MariaDB Database (Message Service용)
+  mariadb-message:
+    image: mariadb:10.11
+    container_name: mariadb-message
+    environment:
+      MYSQL_DATABASE: message-db
+      MYSQL_USER: rozeta
+      MYSQL_PASSWORD: rozeta123
+      MYSQL_ROOT_PASSWORD: maria123
+    ports:
+      - "13311:3306"
+    volumes:
+      - mariadb-message-data:/var/lib/mysql
+    networks:
+      - enterprise-network
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Config Server
   config-server:
     build:
@@ -312,6 +334,32 @@ services:
         condition: service_healthy
     restart: on-failure
 
+  # Message Service
+  message-service:
+    build:
+      context: ./backend/message-service
+      dockerfile: Dockerfile
+      cache_from:
+        - message-service:latest
+    image: message-service:latest
+    container_name: message-service
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-message:3306/message-db?useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: rozeta
+      SPRING_DATASOURCE_PASSWORD: rozeta123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - enterprise-network
+    depends_on:
+      mariadb-message:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    restart: on-failure
+
   # API Gateway
   api-gateway:
     build:
@@ -339,6 +387,8 @@ services:
       board-service:
         condition: service_started
       admin-service:
+        condition: service_started
+      message-service:
         condition: service_started
     restart: on-failure
 
@@ -369,3 +419,4 @@ volumes:
   mariadb-order-data:
   mariadb-board-data:
   mariadb-admin-data:
+  mariadb-message-data:

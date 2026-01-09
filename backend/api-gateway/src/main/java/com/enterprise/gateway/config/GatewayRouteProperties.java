@@ -18,6 +18,7 @@ public class GatewayRouteProperties {
     private OrderServiceConfig order = new OrderServiceConfig();
     private BoardServiceConfig board = new BoardServiceConfig();
     private AdminServiceConfig admin = new AdminServiceConfig();
+    private MessageServiceConfig message = new MessageServiceConfig();
     
     @Data
     public static class UserServiceConfig {
@@ -60,5 +61,12 @@ public class GatewayRouteProperties {
         private String apiDashboardPath = "/api/admin/dashboard/**";    // /stats
         private boolean requireAuth = true;
         private boolean adminOnly = true;
+    }
+
+    @Data
+    public static class MessageServiceConfig {
+        private String serviceUri = "lb://message-service";
+        private String apiPath = "/api/messages/**";
+        private boolean requireAuth = true;
     }
 }

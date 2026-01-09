@@ -141,6 +141,14 @@ export const menuItems = [
     roles: [ROLES.MANAGER, ROLES.ADMIN],
     order: 9,  // ← 순서 변경 (8 → 9)
     requiresAuth: true
+  },
+  {
+    id: 'messages',
+    name: 'Messages',
+    path: '/messages/inbox',
+    icon: 'MessageSquare',
+    roles: [ROLES.GUEST, ROLES.USER, ROLES.MANAGER, ROLES.ADMIN],
+    order: 10
   }
 ]
 

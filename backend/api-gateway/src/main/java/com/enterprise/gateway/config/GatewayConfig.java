@@ -55,8 +55,7 @@ public class GatewayConfig {
                                 .uri(routeProperties.getUser().getServiceUri()));
 
                 // 4. Auth 라우트 - /auth/logout 직접 호출 지원 (인증 필요) ✅ /auth/logout -> /auth/logout
-                // (주의) stripPrefix(1)을 하면 /auth/logout 이 /logout 으로 변형되어 user-service에서 404가
-                // 납니다.
+                // (주의) stripPrefix(1)을 하면 /auth/logout 이 /logout 으로 변형되어 user-service에서 404가 납니다.
                 routes.route("user-service-auth-logout-direct", r -> r
                                 .path("/auth/logout")
                                 .filters(f -> f
@@ -168,9 +167,24 @@ public class GatewayConfig {
                                                                 new JwtAuthenticationFilter.Config(true))))
                                 .uri(routeProperties.getAdmin().getServiceUri()));
 
-                log.info("✅ Admin Service route configured: {} -> {}",
+                log.debug("✅ Admin Service route configured: {} -> {}",
                                 routeProperties.getAdmin().getApiPath(),
                                 routeProperties.getAdmin().getServiceUri());
+
+                // Message Service Routes
+                routes.route("message-service", r -> r
+                                .path(routeProperties.getMessage().getApiPath())
+                                .filters(f -> f
+                                                .stripPrefix(routeProperties.getStripPrefix())
+                                                .filter(jwtAuthenticationFilter.apply(
+                                                                new JwtAuthenticationFilter.Config(
+                                                                                routeProperties.getMessage()
+                                                                                                .isRequireAuth()))))
+                                .uri(routeProperties.getMessage().getServiceUri()));
+
+                log.debug("✅ Message Service route configured: {} -> {}",
+                                routeProperties.getMessage().getApiPath(),
+                                routeProperties.getMessage().getServiceUri());
 
                 return routes.build();
         }

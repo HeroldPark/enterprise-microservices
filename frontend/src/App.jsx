@@ -41,8 +41,17 @@ import AdminPanel from './components/admin/pages/AdminPanel'
 import UserManagement from './components/admin/pages/UserManagement'
 import MenuManagement from './components/admin/pages/MenuManagement'
 
+// System Setting
 import SystemSettings from './components/system/SystemSettings'
+
+// Model Config
 import ModelConfigs from './components/models/ModelConfigs'
+
+// Message pages
+import Inbox from './components/message/pages/Inbox'
+import Sent from './components/message/pages/Sent'
+import MessageCompose from './components/message/pages/MessageCompose'
+import MessageDetail from './components/message/pages/MessageDetail'
 
 // Test pages (개발용)
 import MenuPermissionsTest from './components/menu/MenuPermissionsTest'
@@ -66,28 +75,6 @@ function App() {
             <PrivateRoute>
               <Profile />
             </PrivateRoute>
-          }
-        />
-
-        {/* Board Routes - 모든 사용자 접근 가능 (읽기) */}
-        <Route path="/boards" element={<Boards />} />
-        <Route path="/boards/:id" element={<BoardDetail />} />
-        
-        {/* Board 생성/수정 - 로그인 필수 (USER, ADMIN) */}
-        <Route
-          path="/boards/create"
-          element={
-            <RoleBasedRoute requiredRole={ROLES.USER}>
-              <BoardCreate />
-            </RoleBasedRoute>
-          }
-        />
-        <Route
-          path="/boards/edit/:id"
-          element={
-            <RoleBasedRoute requiredRole={ROLES.USER}>
-              <BoardEdit />
-            </RoleBasedRoute>
           }
         />
 
@@ -218,6 +205,68 @@ function App() {
 
         {/* Fallback Route */}
         <Route path="*" element={<Navigate to="/" replace />} />
+
+        {/* Board Routes - 모든 사용자 접근 가능 (읽기) */}
+        <Route path="/boards" element={<Boards />} />
+        <Route path="/boards/:id" element={<BoardDetail />} />
+
+        {/* Board 생성/수정 - 로그인 필수 (USER, ADMIN) */}
+        <Route
+          path="/boards/create"
+          element={
+            <RoleBasedRoute requiredRole={ROLES.USER}>
+              <BoardCreate />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/boards/edit/:id"
+          element={
+            <RoleBasedRoute requiredRole={ROLES.USER}>
+              <BoardEdit />
+            </RoleBasedRoute>
+          }
+        />
+
+        {/* Message Routes - 모든 사용자 접근 가능 (읽기) */}
+        {/* <Route path="/messages/inbox" element={<Inbox />} />
+        <Route path="/messages/:id" element={<MessageDetail />} /> */}
+
+        {/* Message 보내기/수정 - 로그인 필수 (USER, ADMIN) */}
+        <Route path="/messages" element={<Navigate to="/messages/inbox" replace />} />
+        <Route
+          path="/messages/inbox"
+          element={
+            <RoleBasedRoute requiredRole={ROLES.USER}>
+              <Inbox />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/messages/:id"
+          element={
+            <RoleBasedRoute requiredRole={ROLES.USER}>
+              <MessageDetail />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/messages/sent"
+          element={
+            <RoleBasedRoute requiredRole={ROLES.USER}>
+              <Sent />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/messages/compose"
+          element={
+            <RoleBasedRoute requiredRole={ROLES.USER}>
+              <MessageCompose />
+            </RoleBasedRoute>
+          }
+        />
+        
       </Route>
 
       {/* Layout 없는 페이지 (로그인/회원가입) */}
