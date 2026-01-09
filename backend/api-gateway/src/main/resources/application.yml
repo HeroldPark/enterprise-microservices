@@ -259,3 +259,34 @@ gateway:
 logging:
   level:
     com.enterprise.gateway: DEBUG
+
+---
+# ============================================================
+# 🔥 Kafka 설정
+# ============================================================
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+    topic:
+      gateway-request: gateway.request
+      gateway-response: gateway.response
+      auth-event: gateway.auth.event
+      api-stats: gateway.api.stats
+      rate-limit: gateway.rate.limit
+      error-log: gateway.error.log
+
+# ============================================================
+# 🎯 Gateway 로깅 설정
+# ============================================================
+gateway:
+  logging:
+    enabled: true
+    log-request: true
+    log-response: true
+    log-auth-events: true
+    kafka-enabled: true

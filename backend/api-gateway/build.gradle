@@ -6,10 +6,9 @@ plugins {
 
 group = 'com.enterprise'
 version = '1.0.0'
-description = 'API Gateway with JWT Authentication'
+description = 'API Gateway with JWT Authentication and Kafka Integration'
 
 java {
-    // <java.version>25</java.version>
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
@@ -35,6 +34,10 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // Kafka Integration
+    implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'org.apache.kafka:kafka-clients'  // 명시적 추가
 
     implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
     runtimeOnly  "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"

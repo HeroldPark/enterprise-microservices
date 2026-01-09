@@ -1,13 +1,14 @@
 server:
   port: 8086
+
 spring:
   application:
     name: message-service
   datasource:
-    url: jdbc:mariadb://mariadb-message:3306/message-db?useUnicode=true&characterEncoding=UTF-8
-    username: rozeta
-    password: rozeta123
-    driver-class-name: org.mariadb.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:mariadb://mariadb-message:3306/message-db?useUnicode=true&characterEncoding=UTF-8}
+    username: ${SPRING_DATASOURCE_USERNAME:rozeta}
+    password: ${SPRING_DATASOURCE_PASSWORD:rozeta123}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.mariadb.jdbc.Driver}
   jpa:
     hibernate:
       ddl-auto: update
@@ -19,25 +20,48 @@ spring:
   cloud:
     config:
       enabled: false
+
+kafka:
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+  consumer:
+    group-id: message-service-group
+    auto-offset-reset: earliest
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    properties:
+      spring.json.trusted.packages: "*"
+  producer:
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    acks: all
+    retries: 3
+  topic:
+    message-created: message.created
+    message-read: message.read
+    message-deleted: message.deleted
+
 jwt:
   secret: your-secret-key-must-be-at-least-256-bits-long-for-HS256-algorithm
   expiration: 86400000
+
 eureka:
   client:
     enabled: true
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka/}
     fetch-registry: true
     register-with-eureka: true
   instance:
     prefer-ip-address: true
     lease-renewal-interval-in-seconds: 10
     instance-id: ${spring.application.name}:${server.port}
+
 microservices:
   user-service:
     url: http://user-service
   board-service:
     url: http://board-service
+
 management:
   endpoints:
     web:
@@ -46,16 +70,21 @@ management:
   endpoint:
     health:
       show-details: always
+
 logging:
   level:
-    com.enterprise.admin: DEBUG
+    com.enterprise.message: INFO
     org.springframework.web: INFO
+    org.springframework.kafka: DEBUG
+    org.apache.kafka=INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
 cors:
   allowed-origins:
   - http://localhost:3000
   - http://localhost:5173
+  - http://frontend
   allowed-methods:
   - GET
   - POST

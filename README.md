@@ -122,3 +122,5 @@ Dev/Prod 프로파일별 설정 예시 포함
 # 2026-01-09
   - code-assistent, gradle project 미인식 
   => enterprise-microservices/settings.gradle.kts에 등록해야 함.
+  - message-service, api-gateway에 kafka message queue 추가
+  - kafka 테스트 중

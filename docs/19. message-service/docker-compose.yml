@@ -5,7 +5,7 @@ version: '3.8'
 # MongoDB 대신 MariaDB 사용 (Admin Service용)
 # Kafka 메시지 큐 추가 (Zookeeper 제거 - KRaft 모드 사용)
 
-# 6개의 독립적인 MariaDB 인스턴스 구성
+# 5개의 독립적인 MariaDB 인스턴스 구성
 # UTF-8 완전 지원을 위해 utf8mb4 문자셋 사용
 
 # 포트 매핑
@@ -78,16 +78,15 @@ services:
       retries: 5
       start_period: 30s
     restart: unless-stopped
-    command:
-      - bash
-      - -c
-      - |
-        if [ ! -f /var/lib/kafka/data/.formatted ]; then
-          echo "Formatting Kafka storage for KRaft mode..."
-          kafka-storage format -t MkU3OEVBNTcwNTJENDM2Qk -c /etc/kafka/docker/server.properties
-          touch /var/lib/kafka/data/.formatted
-        fi
-        exec /etc/confluent/docker/run
+    command: >
+      bash -c "
+      # KRaft 스토리지 포맷 (최초 실행시)
+      if [ ! -f /var/lib/kafka/data/.formatted ]; then
+        kafka-storage format -t MkU3OEVBNTcwNTJENDM2Qk -c /etc/kafka/kafka.properties &&
+        touch /var/lib/kafka/data/.formatted
+      fi &&
+      /etc/confluent/docker/run
+      "
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
