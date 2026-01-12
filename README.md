@@ -124,3 +124,6 @@ Dev/Prod 프로파일별 설정 예시 포함
   => enterprise-microservices/settings.gradle.kts에 등록해야 함.
   - message-service, api-gateway에 kafka message queue 추가
   - kafka 테스트 중
+
+# 2026-01-12
+  - kafka 오류 수정

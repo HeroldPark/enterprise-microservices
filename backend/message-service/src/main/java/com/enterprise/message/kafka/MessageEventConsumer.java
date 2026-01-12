@@ -28,7 +28,7 @@ public class MessageEventConsumer {
      */
     @KafkaListener(
         topics = "${kafka.topic.message-created}",
-        groupId = "${kafka.consumer.group-id}",
+        groupId = "${spring.kafka.consumer.group-id}",
         containerFactory = "kafkaListenerContainerFactory"
     )
     public void consumeMessageCreatedEvent(
@@ -66,7 +66,7 @@ public class MessageEventConsumer {
      */
     @KafkaListener(
         topics = "${kafka.topic.message-read}",
-        groupId = "${kafka.consumer.group-id}",
+        groupId = "${spring.kafka.consumer.group-id}",
         containerFactory = "kafkaListenerContainerFactory"
     )
     public void consumeMessageReadEvent(
@@ -100,7 +100,7 @@ public class MessageEventConsumer {
      */
     @KafkaListener(
         topics = "${kafka.topic.message-deleted}",
-        groupId = "${kafka.consumer.group-id}",
+        groupId = "${spring.kafka.consumer.group-id}",
         containerFactory = "kafkaListenerContainerFactory"
     )
     public void consumeMessageDeletedEvent(
@@ -130,37 +130,30 @@ public class MessageEventConsumer {
     // === Private Helper Methods ===
 
     private void sendPushNotification(MessageCreatedEvent event) {
-        // TODO: 푸시 알림 서비스 연동
         log.debug("Sending push notification for message: {}", event.getMessageId());
     }
 
     private void sendEmailNotification(MessageCreatedEvent event) {
-        // TODO: 이메일 알림 서비스 연동 (선택적)
         log.debug("Sending email notification for message: {}", event.getMessageId());
     }
 
     private void updateStatistics(MessageCreatedEvent event) {
-        // TODO: 통계 데이터 업데이트
         log.debug("Updating statistics for message created: {}", event.getMessageId());
     }
 
     private void notifySenderAboutRead(MessageReadEvent event) {
-        // TODO: 발신자에게 읽음 확인 알림
         log.debug("Notifying sender about message read: {}", event.getMessageId());
     }
 
     private void updateReadStatistics(MessageReadEvent event) {
-        // TODO: 읽음 통계 업데이트
         log.debug("Updating read statistics for message: {}", event.getMessageId());
     }
 
     private void clearCacheData(MessageDeletedEvent event) {
-        // TODO: 캐시 데이터 정리
         log.debug("Clearing cache data for message: {}", event.getMessageId());
     }
 
     private void updateDeleteStatistics(MessageDeletedEvent event) {
-        // TODO: 삭제 통계 업데이트
         log.debug("Updating delete statistics for message: {}", event.getMessageId());
     }
 }

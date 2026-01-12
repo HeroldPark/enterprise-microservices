@@ -173,14 +173,14 @@ public class GatewayConfig {
 
                 // Message Service Routes
                 routes.route("message-service", r -> r
-                                .path(routeProperties.getMessage().getApiPath())
-                                .filters(f -> f
-                                                .stripPrefix(routeProperties.getStripPrefix())
-                                                .filter(jwtAuthenticationFilter.apply(
-                                                                new JwtAuthenticationFilter.Config(
-                                                                                routeProperties.getMessage()
-                                                                                                .isRequireAuth()))))
-                                .uri(routeProperties.getMessage().getServiceUri()));
+                        .path(routeProperties.getMessage().getApiPath()) // /api/messages/**
+                        .filters(f -> f
+                                .stripPrefix(routeProperties.getStripPrefix()) // stripPrefix(1) - 표준 패턴
+                                .filter(jwtAuthenticationFilter.apply(
+                                        new JwtAuthenticationFilter.Config(
+                                                routeProperties.getMessage()
+                                                        .isRequireAuth()))))
+                        .uri(routeProperties.getMessage().getServiceUri())); // lb://message-service
 
                 log.debug("✅ Message Service route configured: {} -> {}",
                                 routeProperties.getMessage().getApiPath(),
