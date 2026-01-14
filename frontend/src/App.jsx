@@ -29,12 +29,21 @@ import BoardDetail from './components/board/pages/BoardDetail'
 import BoardCreate from './components/board/pages/BoardCreate'
 import BoardEdit from './components/board/pages/BoardEdit'
 
-// Model pages
+// Model Config
+import ModelConfigs from './components/models/ModelConfigs'
+
 import IsolationForest from './components/models/pages/IsolationForest'
 import LSTM from './components/models/pages/LSTM'
 import GRU from './components/models/pages/GRU'
 import RandomForest from './components/models/pages/RandomForest'
 import XGBoost from './components/models/pages/XGBoost'
+
+// AI Model Management pages (새로 추가)
+import Models from './components/aimodels/pages/Models'
+import ModelDetail from './components/aimodels/pages/ModelDetail'
+import ModelCreate from './components/aimodels/pages/ModelCreate'
+import ModelEdit from './components/aimodels/pages/ModelEdit'
+import PredictionCreate from './components/aimodels/pages/PredictionCreate'
 
 // Admin pages
 import AdminPanel from './components/admin/pages/AdminPanel'
@@ -43,9 +52,6 @@ import MenuManagement from './components/admin/pages/MenuManagement'
 
 // System Setting
 import SystemSettings from './components/system/SystemSettings'
-
-// Model Config
-import ModelConfigs from './components/models/ModelConfigs'
 
 // Message pages
 import Inbox from './components/message/pages/Inbox'
@@ -78,7 +84,7 @@ function App() {
           }
         />
 
-        {/* Model Routes - USER, ADMIN만 접근 가능 */}
+        {/* Model Execution Routes - USER, ADMIN만 접근 가능 */}
         <Route
           path="/models/isolation-forest"
           element={
@@ -116,6 +122,48 @@ function App() {
           element={
             <RoleBasedRoute requiredRole={ROLES.USER}>
               <XGBoost />
+            </RoleBasedRoute>
+          }
+        />
+
+        {/* AI Model Management Routes - USER, ADMIN만 접근 가능 */}
+        <Route
+          path="/aimodels"
+          element={
+            <RoleBasedRoute requiredRole={ROLES.USER}>
+              <Models />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/aimodels/create"
+          element={
+            <RoleBasedRoute requiredRole={ROLES.USER}>
+              <ModelCreate />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/aimodels/:id"
+          element={
+            <RoleBasedRoute requiredRole={ROLES.USER}>
+              <ModelDetail />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/aimodels/edit/:id"
+          element={
+            <RoleBasedRoute requiredRole={ROLES.USER}>
+              <ModelEdit />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/predictions/create"
+          element={
+            <RoleBasedRoute requiredRole={ROLES.USER}>
+              <PredictionCreate />
             </RoleBasedRoute>
           }
         />
@@ -167,7 +215,7 @@ function App() {
             </RoleBasedRoute>
           }
         />
-        
+
         {/* 메뉴 관리 - ADMIN만 접근 가능 */}
         <Route
           path="/admin/menus"
@@ -177,7 +225,7 @@ function App() {
             </RoleBasedRoute>
           }
         />
-        
+
         {/* 모델 설정 - ADMIN만 접근 가능 */}
         <Route
           path="/admin/model-configs"
@@ -187,7 +235,7 @@ function App() {
             </RoleBasedRoute>
           }
         />
-        
+
         {/* 시스템 설정 - ADMIN만 접근 가능 */}
         <Route
           path="/admin/settings"
@@ -202,9 +250,6 @@ function App() {
         {process.env.NODE_ENV === 'development' && (
           <Route path="/test/permissions" element={<MenuPermissionsTest />} />
         )}
-
-        {/* Fallback Route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
 
         {/* Board Routes - 모든 사용자 접근 가능 (읽기) */}
         <Route path="/boards" element={<Boards />} />
@@ -228,11 +273,7 @@ function App() {
           }
         />
 
-        {/* Message Routes - 모든 사용자 접근 가능 (읽기) */}
-        {/* <Route path="/messages/inbox" element={<Inbox />} />
-        <Route path="/messages/:id" element={<MessageDetail />} /> */}
-
-        {/* Message 보내기/수정 - 로그인 필수 (USER, ADMIN) */}
+        {/* Message Routes - 로그인 필수 (USER, ADMIN) */}
         <Route path="/messages" element={<Navigate to="/messages/inbox" replace />} />
         <Route
           path="/messages/inbox"
@@ -266,7 +307,10 @@ function App() {
             </RoleBasedRoute>
           }
         />
-        
+
+        {/* Fallback Route */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+
       </Route>
 
       {/* Layout 없는 페이지 (로그인/회원가입) */}

@@ -83,6 +83,14 @@ gateway:
       service-uri: lb://message-service
       api-path: /api/messages/**
       require-auth: true
+    
+    # ⭐ Model Service 설정 (AI 모델 관리)
+    model:
+      service-uri: lb://model-service
+      api-path: /api/models/**
+      training-path: /api/training/**
+      prediction-path: /api/predictions/**
+      require-auth: true
       
     # Payment Service 추가
     payment:
@@ -135,6 +143,16 @@ gateway:
 
       admin-model-config:
         - /api/admin/model-configs/**
+      
+      # ⭐ Model Service 경로 (인증 필요)
+      models:
+        - /api/models/**
+      
+      training:
+        - /api/training/**
+      
+      predictions:
+        - /api/predictions/**
 
 # Eureka 설정
 eureka:

@@ -126,4 +126,8 @@ Dev/Prod 프로파일별 설정 예시 포함
   - kafka 테스트 중
 
 # 2026-01-12
-  - kafka 오류 수정
+  - kafka 오류 수정 - applicatiom.yml과 소스 코드 사이의 mapping 수정
+
+# 2026-01-14
+  - product-service, order-service 주석 처리
+  - model-service 추가

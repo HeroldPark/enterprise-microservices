@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/kafka-test")
+@RequestMapping("/kafka-test")
 @RequiredArgsConstructor
 public class KafkaTestController {
 

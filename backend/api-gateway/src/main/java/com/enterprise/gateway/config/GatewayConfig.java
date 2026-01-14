@@ -186,6 +186,44 @@ public class GatewayConfig {
                                 routeProperties.getMessage().getApiPath(),
                                 routeProperties.getMessage().getServiceUri());
 
+                // Model Service Routes
+                // 1. Models API (인증 필요)
+                routes.route("model-service-models", r -> r
+                        .path(routeProperties.getModel().getApiPath()) // /api/models/**
+                        .filters(f -> f
+                                .stripPrefix(routeProperties.getStripPrefix()) // stripPrefix(1)
+                                .filter(jwtAuthenticationFilter.apply(
+                                        new JwtAuthenticationFilter.Config(
+                                                routeProperties.getModel()
+                                                        .isRequireAuth()))))
+                        .uri(routeProperties.getModel().getServiceUri())); // lb://model-service
+
+                // 2. Training API (인증 필요)
+                routes.route("model-service-training", r -> r
+                        .path(routeProperties.getModel().getTrainingPath()) // /api/training/**
+                        .filters(f -> f
+                                .stripPrefix(routeProperties.getStripPrefix())
+                                .filter(jwtAuthenticationFilter.apply(
+                                        new JwtAuthenticationFilter.Config(
+                                                routeProperties.getModel()
+                                                        .isRequireAuth()))))
+                        .uri(routeProperties.getModel().getServiceUri()));
+
+                // 3. Predictions API (인증 필요)
+                routes.route("model-service-predictions", r -> r
+                        .path(routeProperties.getModel().getPredictionPath()) // /api/predictions/**
+                        .filters(f -> f
+                                .stripPrefix(routeProperties.getStripPrefix())
+                                .filter(jwtAuthenticationFilter.apply(
+                                        new JwtAuthenticationFilter.Config(
+                                                routeProperties.getModel()
+                                                        .isRequireAuth()))))
+                        .uri(routeProperties.getModel().getServiceUri()));
+
+                log.debug("✅ Model Service routes configured: {} -> {}",
+                                routeProperties.getModel().getApiPath(),
+                                routeProperties.getModel().getServiceUri());
+
                 return routes.build();
         }
 }

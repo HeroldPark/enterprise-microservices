@@ -4,17 +4,19 @@ version: '3.8'
 # PostgreSQL → MariaDB 10.11 변경
 # MongoDB 대신 MariaDB 사용 (Admin Service용)
 # Kafka 메시지 큐 추가 (Zookeeper 제거 - KRaft 모드 사용)
+# PostgreSQL 추가 (Model Service용)
 
-# 6개의 독립적인 MariaDB 인스턴스 구성
+# 7개의 독립적인 DB 인스턴스 구성
 # UTF-8 완전 지원을 위해 utf8mb4 문자셋 사용
 
 # 포트 매핑
-# User DB: 13306 포트
-# Product DB: 13307 포트
-# Order DB: 13308 포트
-# Board DB: 13309 포트
-# Admin DB: 13310 포트
-# Message DB: 13311 포트
+# User DB: 13306 포트 (MariaDB)
+# Product DB: 13307 포트 (MariaDB)
+# Order DB: 13308 포트 (MariaDB)
+# Board DB: 13309 포트 (MariaDB)
+# Admin DB: 13310 포트 (MariaDB)
+# Message DB: 13311 포트 (MariaDB)
+# Model DB: 15432 포트 (PostgreSQL)
 
 # Kafka 포트 (KRaft 모드 - Zookeeper 불필요)
 # Kafka Broker: 9092 (내부), 9093 (외부)
@@ -23,9 +25,11 @@ version: '3.8'
 
 # 접속 정보 단순화
 # MariaDB - Username: rozeta, Password: rozeta123, Root Password: maria123
+# PostgreSQL - Username: rozeta, Password: rozeta123
 
 # JDBC URL 변경
 # jdbc:mariadb:// 형식 사용
+# jdbc:postgresql:// 형식 사용 (Model DB)
 # UTF-8 인코딩 파라미터 추가
 
 # Enable BuildKit for better caching and parallel builds
@@ -76,18 +80,6 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-      start_period: 30s
-    restart: unless-stopped
-    command:
-      - bash
-      - -c
-      - |
-        if [ ! -f /var/lib/kafka/data/.formatted ]; then
-          echo "Formatting Kafka storage for KRaft mode..."
-          kafka-storage format -t MkU3OEVBNTcwNTJENDM2Qk -c /etc/kafka/docker/server.properties
-          touch /var/lib/kafka/data/.formatted
-        fi
-        exec /etc/confluent/docker/run
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -105,7 +97,6 @@ services:
       LOGGING_LEVEL_COM_PROVECTUS: WARN
     networks:
       - enterprise-network
-    restart: unless-stopped
 
   # =====================================================
   # Databases - MariaDB
@@ -238,6 +229,30 @@ services:
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # =====================================================
+  # Database - PostgreSQL (for AI Model Service)
+  # =====================================================
+  
+  postgres-model:
+    image: postgres:16-alpine
+    container_name: postgres-model
+    environment:
+      POSTGRES_DB: model-db
+      POSTGRES_USER: rozeta
+      POSTGRES_PASSWORD: rozeta123
+    ports:
+      - "15432:5432"
+    volumes:
+      - postgres-model-data:/var/lib/postgresql/data
+    networks:
+      - enterprise-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rozeta"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -470,6 +485,34 @@ services:
         condition: service_healthy
     restart: on-failure
 
+  model-service:
+    build:
+      context: ./backend/model-service
+      dockerfile: Dockerfile
+      cache_from:
+        - model-service:latest
+    image: model-service:latest
+    container_name: model-service
+    ports:
+      - "8087:8087"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-model:5432/model-db?useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: rozeta
+      SPRING_DATASOURCE_PASSWORD: rozeta123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    networks:
+      - enterprise-network
+    depends_on:
+      postgres-model:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: on-failure
+
   # =====================================================
   # API Gateway
   # =====================================================
@@ -502,6 +545,8 @@ services:
       admin-service:
         condition: service_started
       message-service:
+        condition: service_started
+      model-service:
         condition: service_started
     restart: on-failure
 
@@ -540,3 +585,4 @@ volumes:
   mariadb-board-data:
   mariadb-admin-data:
   mariadb-message-data:
+  postgres-model-data:

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { 
-  Home, Users, ShoppingCart, Package, Settings, 
+import {
+  Home, Users, ShoppingCart, Package, Settings,
   ChevronDown, ChevronRight, Menu as MenuIcon,
   BarChart, FileText, Shield, Database, X, Brain, LogOut, Sparkles,
   Target, GitBranch, Zap, Trees, TrendingUp, Lock, Bell, Heart, MessageSquare
@@ -29,7 +29,7 @@ const iconMap = {
   'ArticleIcon': FileText,
   'ComputerIcon': Settings,
   'TuneIcon': Settings,
-  
+
   // Lucide 아이콘 (직접 이름 매핑)
   'Home': Home,
   'Brain': Brain,
@@ -72,7 +72,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const [expandedMenus, setExpandedMenus] = useState({})
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
-  
+
   const { user, logout } = useAuthStore()
   const userRole = user?.role || ROLES.GUEST
 
@@ -84,7 +84,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         console.log('🔧 [Sidebar] 메뉴 로딩 시작...')
         console.log('👤 [Sidebar] 현재 유저:', user)
         console.log('🔑 [Sidebar] 현재 권한:', userRole)
-        
+
         // 1️⃣ 기본 메뉴 (하드코딩)
         const defaultMenus = [
           {
@@ -103,7 +103,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           },
           {
             id: 'models',
-            name: 'Models',
+            name: '예측 모델',  // Models
             path: null,
             icon: 'Brain',
             children: [
@@ -140,27 +140,34 @@ const Sidebar = ({ isOpen, onClose }) => {
             ]
           },
           {
-            id: 'products',
-            name: '상품 관리',
-            path: '/products',
-            icon: 'PackageIcon',
+            id: 'aimodels',
+            name: 'AI Models',
+            path: '/aimodels',
+            icon: 'Database',
             children: []
           },
-          {
-            id: 'orders',
-            name: '주문 관리',
-            path: '/orders',
-            icon: 'ShoppingCartIcon',
-            children: []
-          },
-          {
-            id: 'demo',
-            name: 'Demo',
-            path: '/demo',
-            icon: 'Sparkles',
-            roles: [ROLES.ADMIN],
-            children: []
-          },
+          // {
+          //   id: 'products',
+          //   name: '상품 관리',
+          //   path: '/products',
+          //   icon: 'PackageIcon',
+          //   children: []
+          // },
+          // {
+          //   id: 'orders',
+          //   name: '주문 관리',
+          //   path: '/orders',
+          //   icon: 'ShoppingCartIcon',
+          //   children: []
+          // },
+          // {
+          //   id: 'demo',
+          //   name: 'Demo',
+          //   path: '/demo',
+          //   icon: 'Sparkles',
+          //   roles: [ROLES.ADMIN],
+          //   children: []
+          // },
           {
             id: 'boards',
             name: '게시판',
@@ -176,14 +183,14 @@ const Sidebar = ({ isOpen, onClose }) => {
             children: []
           }
         ]
-        
+
         console.log('📋 [Sidebar] 기본 메뉴:', defaultMenus.length, '개')
-        
+
         // 2️⃣ DB 메뉴 가져오기
         try {
           const dbMenus = await menuApi.getAllMenus()
           console.log('📦 [Sidebar] DB 메뉴 (전체):', dbMenus)
-          
+
           if (dbMenus && dbMenus.length > 0) {
             // DB 메뉴 구조를 Sidebar 형식으로 변환
             const convertedDbMenus = dbMenus.map(menu => ({
@@ -198,9 +205,9 @@ const Sidebar = ({ isOpen, onClose }) => {
                 icon: sub.icon || 'MenuIcon'
               })) || []
             }))
-            
+
             console.log('✅ [Sidebar] 변환된 DB 메뉴:', convertedDbMenus.length, '개')
-            
+
             // 3️⃣ 기본 메뉴 + DB 메뉴 병합
             const allMenus = [...defaultMenus, ...convertedDbMenus]
             console.log('🎯 [Sidebar] 전체 메뉴:', allMenus.length, '개')
@@ -220,7 +227,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         setLoading(false)
       }
     }
-    
+
     loadMenus()
   }, [userRole])
 
@@ -240,12 +247,12 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const handleMenuClick = (menu) => {
     console.log('🖱️ [Sidebar] 메뉴 클릭:', menu.name)
-    
+
     // Case 1: 드롭다운 메뉴 (children 있음)
     if (menu.children && menu.children.length > 0) {
       console.log('✅ [Sidebar] 하위 메뉴 있음 - 토글 실행')
       toggleMenu(menu.id)
-    } 
+    }
     // Case 2: 링크 메뉴 (path 있음)
     else if (menu.path) {
       console.log('🔗 [Sidebar] 페이지 이동:', menu.path)
@@ -276,8 +283,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           <NavLink
             to={menu.path}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors ${
-                isActive ? 'bg-gray-700 text-white border-l-4 border-blue-500' : ''
+              `flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors ${isActive ? 'bg-gray-700 text-white border-l-4 border-blue-500' : ''
               } ${level > 0 ? 'pl-8' : ''}`
             }
             onClick={() => hasChildren && toggleMenu(menu.id)}
@@ -292,9 +298,8 @@ const Sidebar = ({ isOpen, onClose }) => {
           /* Case 2: 링크가 없는 메뉴 (드롭다운 전용) */
           <button
             onClick={() => handleMenuClick(menu)}
-            className={`w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors ${
-              level > 0 ? 'pl-8' : ''
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors ${level > 0 ? 'pl-8' : ''
+              }`}
           >
             <Icon size={20} />
             <span className="flex-1 text-left">{menu.name}</span>
@@ -335,7 +340,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const getHeaderTitle = () => {
     if (!user || !user.role) return 'System Panel'
-    
+
     switch (user.role) {
       case ROLES.ADMIN:
         return 'Admin Panel'
@@ -352,7 +357,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const getHeaderSubtitle = () => {
     if (!user || !user.role) return '시스템'
-    
+
     switch (user.role) {
       case ROLES.ADMIN:
         return '관리자 시스템'
@@ -377,9 +382,8 @@ const Sidebar = ({ isOpen, onClose }) => {
       )}
 
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-30 w-64 bg-gray-800 transform transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        }`}
+        className={`fixed md:static inset-y-0 left-0 z-30 w-64 bg-gray-800 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          }`}
       >
         {/* 헤더 */}
         <div className="flex items-center justify-between h-16 px-4 bg-gray-900 border-b border-gray-700">
@@ -416,26 +420,26 @@ const Sidebar = ({ isOpen, onClose }) => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
               <p className="text-gray-400 text-sm">메뉴 로딩 중...</p>
             </div>
-          ) 
-          /* 메뉴 없음 */
-          : menus.length === 0 ? (
-            <div className="px-4 py-8">
-              <div className="bg-yellow-900 bg-opacity-20 border border-yellow-500 rounded-lg p-4">
-                <p className="text-yellow-400 text-sm font-medium">메뉴가 없습니다</p>
-                <p className="text-yellow-300 text-xs mt-1">
-                  메뉴 관리에서 메뉴를 등록하세요
-                </p>
+          )
+            /* 메뉴 없음 */
+            : menus.length === 0 ? (
+              <div className="px-4 py-8">
+                <div className="bg-yellow-900 bg-opacity-20 border border-yellow-500 rounded-lg p-4">
+                  <p className="text-yellow-400 text-sm font-medium">메뉴가 없습니다</p>
+                  <p className="text-yellow-300 text-xs mt-1">
+                    메뉴 관리에서 메뉴를 등록하세요
+                  </p>
+                </div>
               </div>
-            </div>
-          ) 
-          /* 메뉴 렌더링 */
-          : (
-            <div>
-              {menus.map(menu => (
-                <MenuItem key={menu.id} menu={menu} />
-              ))}
-            </div>
-          )}
+            )
+              /* 메뉴 렌더링 */
+              : (
+                <div>
+                  {menus.map(menu => (
+                    <MenuItem key={menu.id} menu={menu} />
+                  ))}
+                </div>
+              )}
         </nav>
 
         {/* 푸터 - 사용자 정보 */}
@@ -446,7 +450,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                 {getUserInitial()}
               </span>
             </div>
-            
+
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <p className="text-white font-medium truncate">
@@ -462,7 +466,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                 {getDisplayInfo()}
               </p>
             </div>
-            
+
             <button
               onClick={handleLogout}
               className="text-gray-400 hover:text-white transition-colors"

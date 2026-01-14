@@ -19,6 +19,7 @@ public class GatewayRouteProperties {
     private BoardServiceConfig board = new BoardServiceConfig();
     private AdminServiceConfig admin = new AdminServiceConfig();
     private MessageServiceConfig message = new MessageServiceConfig();
+    private ModelServiceConfig model = new ModelServiceConfig();
     
     @Data
     public static class UserServiceConfig {
@@ -67,6 +68,15 @@ public class GatewayRouteProperties {
     public static class MessageServiceConfig {
         private String serviceUri = "lb://message-service";
         private String apiPath = "/api/messages/**";
+        private boolean requireAuth = true;
+    }
+
+    @Data
+    public static class ModelServiceConfig {
+        private String serviceUri = "lb://model-service";
+        private String apiPath = "/api/models/**";
+        private String trainingPath = "/api/training/**";
+        private String predictionPath = "/api/predictions/**";
         private boolean requireAuth = true;
     }
 }
