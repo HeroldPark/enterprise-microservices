@@ -10,4 +10,6 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findByReceiverIdAndIsReadFalseOrderByCreatedAtDesc(Long receiverId);
 
     List<Message> findBySenderIdOrderByCreatedAtDesc(Long senderId);
+
+    List<Message> findAllByOrderByCreatedAtDesc();
 }

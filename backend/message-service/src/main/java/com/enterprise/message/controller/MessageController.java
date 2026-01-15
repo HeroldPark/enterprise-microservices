@@ -37,6 +37,11 @@ public class MessageController {
         return ResponseEntity.ok(messageService.sent(senderId));
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<MessageResponseDto>> getAllMessages() {
+        return ResponseEntity.ok(messageService.getAllMessages());
+    }
+
     @PatchMapping("/{id}/read")
     public ResponseEntity<MessageResponseDto> markRead(@PathVariable Long id) {
         return ResponseEntity.ok(messageService.markRead(id));

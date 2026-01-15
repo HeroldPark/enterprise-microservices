@@ -58,6 +58,8 @@ import Inbox from './components/message/pages/Inbox'
 import Sent from './components/message/pages/Sent'
 import MessageCompose from './components/message/pages/MessageCompose'
 import MessageDetail from './components/message/pages/MessageDetail'
+import AllMessages from './components/message/pages/AllMessages'
+import AutoMessageGenerator from './components/message/pages/AutoMessageGenerator'
 
 // Test pages (개발용)
 import MenuPermissionsTest from './components/menu/MenuPermissionsTest'
@@ -274,6 +276,7 @@ function App() {
         />
 
         {/* Message Routes - 로그인 필수 (USER, ADMIN) */}
+        <Route path="/messages/all" element={<AllMessages />} />
         <Route path="/messages" element={<Navigate to="/messages/inbox" replace />} />
         <Route
           path="/messages/inbox"
@@ -307,6 +310,8 @@ function App() {
             </RoleBasedRoute>
           }
         />
+        {/* ✅ 자동 생성기 라우트 추가 */}
+        <Route path="/messages/auto-generator" element={<AutoMessageGenerator />} />
 
         {/* Fallback Route */}
         <Route path="*" element={<Navigate to="/" replace />} />

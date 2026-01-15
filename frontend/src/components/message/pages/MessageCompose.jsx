@@ -14,9 +14,10 @@ const MessageCompose = () => {
 
   const { user, token } = useAuthStore()
 
+  // 받는 사람 ID를 여러 방식으로 받을 수 있음
   const initialReceiverId =
-    location.state?.receiverId ??
-    (searchParams.get('to') ? Number(searchParams.get('to')) : '')
+    location.state?.receiverId ??   // 1순위: 이전 페이지에서 state로 전달
+    (searchParams.get('to') ? Number(searchParams.get('to')) : '')  // 2순위: URL 쿼리 파라미터
 
   const [receiverId, setReceiverId] = useState(initialReceiverId)
   const [content, setContent] = useState('')
@@ -50,12 +51,14 @@ const MessageCompose = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
+    // 1️⃣ 로그인 체크
     if (!user?.id) {
       alert('로그인이 필요합니다')
       navigate('/login')
       return
     }
 
+    // 2️⃣ 입력값 검증
     const rid = Number(receiverId)
     if (!rid || Number.isNaN(rid)) {
       alert('받는 사람 ID(receiverId)를 입력해주세요')
@@ -67,6 +70,7 @@ const MessageCompose = () => {
       return
     }
 
+    // 3️⃣ API 호출
     sendMutation.mutate({
       senderId: user.id,
       receiverId: rid,

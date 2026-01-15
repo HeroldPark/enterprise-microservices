@@ -26,6 +26,12 @@ export const messageService = {
     return response.data
   },
 
+  // ✅ 전체 메시지 조회 (관리자용)
+  getAllMessages: async () => {
+    const response = await api.get('/messages/all')
+    return response.data
+  },
+
   // ✅ 쪽지 단건 조회
   getById: async (id) => {
     const response = await api.get(`/messages/${id}`)

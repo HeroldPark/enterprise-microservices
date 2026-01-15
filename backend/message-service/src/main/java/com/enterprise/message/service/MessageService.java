@@ -69,6 +69,12 @@ public class MessageService {
                 .stream().map(this::toDto).toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<MessageResponseDto> getAllMessages() {
+            return messageRepository.findAllByOrderByCreatedAtDesc()
+                            .stream().map(this::toDto).toList();
+    }
+
     @Transactional
     public MessageResponseDto markRead(Long id) {
         Message message = messageRepository.findById(id)

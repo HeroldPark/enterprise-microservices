@@ -130,4 +130,11 @@ Dev/Prod 프로파일별 설정 예시 포함
 
 # 2026-01-14
   - product-service, order-service 주석 처리
+  - demo 메뉴 주석 처리
   - model-service 추가
+
+# 2026-01-15
+  - message-service : Query 로그 결과 출력되게 수정
+  - docker-compose.yml, application.yml, application-dev.yml, logback-spring.xml, log4jdbc.log4j2.properties
+  - local, dev, prod 분리 설정
+  - kafka : 받은 쪽지함, 보낸 쪽지함, 전체 메시지, 자동 생성기

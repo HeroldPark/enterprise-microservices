@@ -42,13 +42,24 @@ const MessageDetail = () => {
   const markReadMutation = useMutation({
     mutationFn: () => messageService.markRead(messageId),
     onSuccess: (updated) => {
-      // detail 캐시 업데이트
+      console.log('✅ 읽음 처리 성공:', updated)
+
+      // 1. detail 캐시 업데이트
       queryClient.setQueryData(['messages', 'detail', messageId], updated)
-      // inbox 캐시 무효화
+
+      // 2. inbox 캐시 무효화
       if (user?.id) {
         queryClient.invalidateQueries({ queryKey: ['messages', 'inbox', user.id] })
       }
+
+      // ✅ 3. 전체 메시지 캐시 무효화 (추가!)
+      queryClient.invalidateQueries({ queryKey: ['messages', 'all'] })
+
+      console.log('🔄 캐시 무효화 완료: inbox, all')
     },
+    onError: (error) => {
+      console.error('❌ 읽음 처리 실패:', error)
+    }
   })
 
   const deleteMutation = useMutation({
@@ -59,6 +70,9 @@ const MessageDetail = () => {
         queryClient.invalidateQueries({ queryKey: ['messages', 'inbox', user.id] })
         queryClient.invalidateQueries({ queryKey: ['messages', 'sent', user.id] })
       }
+      // ✅ 전체 메시지 캐시도 무효화 (추가!)
+      queryClient.invalidateQueries({ queryKey: ['messages', 'all'] })
+
       navigate(-1)
     },
     onError: (err) => {
@@ -70,9 +84,26 @@ const MessageDetail = () => {
   // 받은 쪽지일 때만 자동 읽음 처리
   useEffect(() => {
     if (!message || !user?.id) return
+
     const isReceiver = message.receiverId === user.id
+
+    console.log('📧 메시지 상세:', {
+      messageId: message.id,
+      senderId: message.senderId,
+      receiverId: message.receiverId,
+      currentUserId: user.id,
+      isReceiver,
+      read: message.read
+    })
+
+    // ✅ 받은 쪽지 + 안읽음 상태일 때만 읽음 처리
     if (isReceiver && message.read === false && !markReadMutation.isPending) {
+      console.log('📬 받은 쪽지 → 읽음 처리 실행')
       markReadMutation.mutate()
+    } else if (!isReceiver) {
+      console.log('📤 보낸 쪽지 → 읽음 처리 안 함 (정상)')
+    } else if (message.read === true) {
+      console.log('✅ 이미 읽음 → 읽음 처리 안 함')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [message, user?.id])
@@ -134,6 +165,7 @@ const MessageDetail = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        {/* 읽음 상태 표시 개선 */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className={message.read ? 'text-gray-400' : 'text-blue-600'}>
@@ -173,14 +205,36 @@ const MessageDetail = () => {
           </div>
         </div>
 
+        {/* 역할 표시 추가 */}
+        {(isReceiver || isSender) && (
+          <div className="mt-4 flex gap-2">
+            {isReceiver && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                📥 받은 쪽지
+              </span>
+            )}
+            {isSender && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                📤 보낸 쪽지
+              </span>
+            )}
+          </div>
+        )}
+
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
             <p className="text-xs text-gray-500">From</p>
-            <p className="text-sm font-medium text-gray-900 mt-1">{message.senderId}</p>
+            <p className="text-sm font-medium text-gray-900 mt-1">
+              ID {message.senderId}
+              {isSender && <span className="ml-2 text-blue-600">(나)</span>}
+            </p>
           </div>
           <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
             <p className="text-xs text-gray-500">To</p>
-            <p className="text-sm font-medium text-gray-900 mt-1">{message.receiverId}</p>
+            <p className="text-sm font-medium text-gray-900 mt-1">
+              ID {message.receiverId}
+              {isReceiver && <span className="ml-2 text-purple-600">(나)</span>}
+            </p>
           </div>
         </div>
 
@@ -191,9 +245,18 @@ const MessageDetail = () => {
         </div>
 
         <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
-          <span>
-            상태: {message.read ? '읽음' : '안읽음'}
-          </span>
+          <div className="flex items-center gap-4">
+            <span>
+              상태: <span className={message.read ? 'text-gray-600' : 'text-blue-600 font-medium'}>
+                {message.read ? '읽음 ✓' : '안읽음'}
+              </span>
+            </span>
+            {isReceiver && !message.read && (
+              <span className="text-blue-600">
+                (자동 읽음 처리됨)
+              </span>
+            )}
+          </div>
           <span>
             updated: {formatDateTime(message.updatedAt)}
           </span>

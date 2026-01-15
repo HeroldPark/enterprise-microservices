@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: message-service
+  # docker-compose.yml에서 결정
+  # profiles:
+  #   # 실행 시: --spring.profiles.active=dev / local / prod
+  #   active: dev
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
     consumer:
@@ -29,10 +33,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false           # ✅ 공통 OFF
     properties:
       hibernate:
-        format_sql: true
+        # ✅ 공통 OFF (또는 이 두 줄 자체를 삭제해도 됩니다)
+        format_sql: false
+        highlight_sql: false
         dialect: org.hibernate.dialect.MariaDBDialect
   cloud:
     config:
@@ -78,11 +84,13 @@ management:
 
 logging:
   level:
-    com.enterprise.message: INFO        # message-service 애플리케이션 로그
-    org.springframework.web: INFO       # Spring Web 로그
-    org.springframework.kafka: INFO     # ← Spring Kafka 프레임워크 로그 (상세)
-    org.apache.kafka: INFO              # Apache Kafka 클라이언트 로그
-    org.hibernate.SQL: DEBUG            # Hibernate SQL 쿼리 로그
+    com.enterprise.message: INFO            # message-service 애플리케이션 로그
+    org.springframework.web: INFO           # Spring Web 로그
+    org.springframework.kafka: INFO         # ← Spring Kafka 프레임워크 로그 (상세)
+    org.apache.kafka: INFO                  # Apache Kafka 클라이언트 로그
+    org.hibernate.SQL: DEBUG                # Hibernate SQL 쿼리 로그
+    # org.hibernate.orm.jdbc.bind: TRACE      # ? 바인딩 값
+    # org.hibernate.orm.jdbc.extract: TRACE   # ✅ 조회 결과(추출된 값) 로그
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE    # SQL 파라미터 바인딩
 
 cors:

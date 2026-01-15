@@ -31,6 +31,9 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.ACKS_CONFIG, "all"); // 모든 레플리카 확인
         props.put(ProducerConfig.RETRIES_CONFIG, 3); // 재시도 횟수
         props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true); // 멱등성 보장
+
+        // ✅ 메시지 타입 정보를 헤더에 추가
+        props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, true);
         
         return new DefaultKafkaProducerFactory<>(props);
     }

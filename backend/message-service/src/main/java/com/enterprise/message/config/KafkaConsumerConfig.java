@@ -42,9 +42,18 @@ public class KafkaConsumerConfig {
         props.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
         props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
 
+        // ✅ 신뢰할 수 있는 패키지 설정
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-        props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
-        props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "com.enterprise.message.dto.event.MessageCreatedEvent");
+
+        // ✅ TYPE_INFO_HEADERS 활성화 - Producer가 보낸 타입 정보를 사용
+        props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, true);
+        // props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "com.enterprise.message.dto.event.MessageCreatedEvent");
+
+        // ✅ 타입 매핑 추가 - 각 이벤트 클래스 매핑
+        props.put(JsonDeserializer.TYPE_MAPPINGS,
+                "MessageCreatedEvent:com.enterprise.message.dto.event.MessageCreatedEvent," +
+                "MessageReadEvent:com.enterprise.message.dto.event.MessageReadEvent," +
+                "MessageDeletedEvent:com.enterprise.message.dto.event.MessageDeletedEvent");
         
         return new DefaultKafkaConsumerFactory<>(props);
     }

@@ -4,7 +4,8 @@ import {
   Home, Users, ShoppingCart, Package, Settings,
   ChevronDown, ChevronRight, Menu as MenuIcon,
   BarChart, FileText, Shield, Database, X, Brain, LogOut, Sparkles,
-  Target, GitBranch, Zap, Trees, TrendingUp, Lock, Bell, Heart, MessageSquare
+  Target, GitBranch, Zap, Trees, TrendingUp, Lock, Bell, Heart, MessageSquare,
+  Send, Inbox, Mail, MessageCircle, Cuboid
 } from 'lucide-react'
 import { useAuthStore } from './authStore'
 import menuApi from '../menu/menuApi'  // ← menuApi import 추가
@@ -48,7 +49,12 @@ const iconMap = {
   'Lock': Lock,
   'Bell': Bell,
   'Heart': Heart,
-  'MessageSquare': MessageSquare
+  'MessageSquare': MessageSquare,
+  'Send': Send,
+  'Inbox': Inbox,
+  'Mail': Mail,
+  'MessageCircle': MessageCircle,
+  'Cuboid': Cuboid
 }
 
 // 권한별 한글 표시
@@ -143,31 +149,9 @@ const Sidebar = ({ isOpen, onClose }) => {
             id: 'aimodels',
             name: 'AI Models',
             path: '/aimodels',
-            icon: 'Database',
+            icon: 'Cuboid',
             children: []
           },
-          // {
-          //   id: 'products',
-          //   name: '상품 관리',
-          //   path: '/products',
-          //   icon: 'PackageIcon',
-          //   children: []
-          // },
-          // {
-          //   id: 'orders',
-          //   name: '주문 관리',
-          //   path: '/orders',
-          //   icon: 'ShoppingCartIcon',
-          //   children: []
-          // },
-          // {
-          //   id: 'demo',
-          //   name: 'Demo',
-          //   path: '/demo',
-          //   icon: 'Sparkles',
-          //   roles: [ROLES.ADMIN],
-          //   children: []
-          // },
           {
             id: 'boards',
             name: '게시판',
@@ -178,9 +162,35 @@ const Sidebar = ({ isOpen, onClose }) => {
           {
             id: 'messages',
             name: '메시지',
-            path: '/messages/inbox',
+            path: null,
             icon: 'MessageSquare',
-            children: []
+            children: [
+              {
+                id: 'messages-inbox',
+                name: '받은 쪽지함',
+                path: '/messages/inbox',
+                icon: 'Inbox'
+              },
+              {
+                id: 'messages-sent',
+                name: '보낸 쪽지함',
+                path: '/messages/sent',
+                icon: 'Send'
+              },
+              {
+                id: 'messages-all',
+                name: '전체 메시지',
+                path: '/messages/all',
+                icon: 'MessageCircle'
+              },
+              // ✅ 자동 생성기 추가
+              {
+                name: '자동 생성기',
+                path: '/messages/auto-generator',
+                icon: Sparkles,
+                badge: 'NEW',  // 선택사항: 새 기능 표시
+              },
+            ]
           }
         ]
 
@@ -238,12 +248,6 @@ const Sidebar = ({ isOpen, onClose }) => {
       [menuId]: !prev[menuId]
     }))
   }
-
-  // 확장 상태 예시:
-  // expandedMenus = {
-  //   'models': true,    // Models 메뉴 확장됨
-  //   'settings': false  // Settings 메뉴 축소됨
-  // }
 
   const handleMenuClick = (menu) => {
     console.log('🖱️ [Sidebar] 메뉴 클릭:', menu.name)

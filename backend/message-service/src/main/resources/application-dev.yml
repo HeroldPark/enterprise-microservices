@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    url: jdbc:log4jdbc:mariadb://localhost:13311/message-db?useUnicode=true&characterEncoding=utf8
+    username: root
+    password: maria123
+
+  jpa:
+    show-sql: false   # Hibernate: 접두어 방지 (중복 출력도 방지)
+    properties:
+      hibernate:
+        format_sql: false
+        highlight_sql: false

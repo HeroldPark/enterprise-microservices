@@ -468,10 +468,20 @@ services:
     ports:
       - "8086:8086"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-message:3306/message-db?useUnicode=true&characterEncoding=UTF-8
+      SPRING_PROFILES_ACTIVE: dev
+      
+      # Query 결과 출력 어려움
+      # SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-message:3306/message-db?useUnicode=true&characterEncoding=UTF-8
+      # SPRING_DATASOURCE_USERNAME: rozeta
+      # SPRING_DATASOURCE_PASSWORD: rozeta123
+      # SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
+      
+      # Query 결과 출력 보기 위해서 log4jdbc 사용
+      SPRING_DATASOURCE_URL: jdbc:log4jdbc:mariadb://mariadb-message:3306/message-db?useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
       SPRING_DATASOURCE_USERNAME: rozeta
       SPRING_DATASOURCE_PASSWORD: rozeta123
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
+
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     networks:

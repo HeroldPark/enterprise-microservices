@@ -3,26 +3,27 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import {
-  Loader, Plus, Search, X, Send, Filter, ArrowUpDown,
-  ChevronDown, ChevronLeft, ChevronRight, Mail, MailOpen,
-  Trash2, User, Clock
+  Loader, Plus, Search, X, Database, Filter, ChevronDown,
+  ChevronLeft, ChevronRight, Mail, MailOpen, Trash2,
+  ArrowUpDown, User, Clock
 } from 'lucide-react'
 
 import { messageService } from '../services/messageService'
 import { useAuthStore } from '../../app/authStore'
 
-const Sent = () => {
+const AllMessages = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+
   const { user, token, isAuthenticated } = useAuthStore()
 
   // State
   const [searchKeyword, setSearchKeyword] = useState('')
   const [tempKeyword, setTempKeyword] = useState('')
   const [filterType, setFilterType] = useState('all') // 'all', 'read', 'unread'
-  const [sortOrder, setSortOrder] = useState('desc')
+  const [sortOrder, setSortOrder] = useState('desc') // 'desc', 'asc'
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const [pageSize, setPageSize] = useState(10) // 페이지당 항목 수
 
   useEffect(() => {
     if (!user || !token) {
@@ -31,23 +32,24 @@ const Sent = () => {
     }
   }, [user, token, navigate])
 
-  const senderId = user?.id
-
   // 데이터 조회
   const { data: messages, isLoading, error, refetch } = useQuery({
-    queryKey: ['messages', 'sent', senderId],
-    queryFn: () => messageService.getSent(senderId),
-    enabled: !!senderId,
+    queryKey: ['messages', 'all'],
+    queryFn: () => messageService.getAllMessages(),
+    enabled: !!user,
     retry: 1,
-    staleTime: 15000,
+    staleTime: 10000,
   })
 
   // 삭제 mutation
   const deleteMutation = useMutation({
     mutationFn: (messageId) => messageService.deleteMessage(messageId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['messages', 'sent', senderId] })
       queryClient.invalidateQueries({ queryKey: ['messages', 'all'] })
+      if (user?.id) {
+        queryClient.invalidateQueries({ queryKey: ['messages', 'inbox', user.id] })
+        queryClient.invalidateQueries({ queryKey: ['messages', 'sent', user.id] })
+      }
     },
     onError: (err) => {
       alert(`삭제에 실패했습니다: ${err.response?.data?.message || err.message}`)
@@ -164,7 +166,7 @@ const Sent = () => {
     }
   }
 
-  // 내용 미리보기
+  // 내용 미리보기 (최대 50자)
   const truncateContent = (content, maxLength = 50) => {
     if (!content) return '-'
     return content.length > maxLength ? `${content.substring(0, maxLength)}...` : content
@@ -181,7 +183,7 @@ const Sent = () => {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-500">쪽지를 불러오는 중 오류가 발생했습니다</p>
+        <p className="text-red-500">메시지를 불러오는 중 오류가 발생했습니다</p>
         <button
           onClick={() => refetch()}
           className="mt-4 px-4 py-2 rounded-lg bg-gray-900 text-white hover:bg-gray-800"
@@ -201,8 +203,8 @@ const Sent = () => {
           animate={{ opacity: 1, y: 0 }}
         >
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 flex items-center gap-3">
-            <Send className="h-8 w-8 text-blue-600" />
-            보낸 쪽지함
+            <Database className="h-8 w-8 text-purple-600" />
+            전체 메시지
           </h1>
           <p className="text-sm text-gray-500 mt-1">
             총 {stats.total}개 (읽음: {stats.read}, 안읽음: {stats.unread})
@@ -256,7 +258,7 @@ const Sent = () => {
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="w-full pl-10 pr-8 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
+                className="w-full pl-10 pr-8 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 appearance-none cursor-pointer"
               >
                 <option value="all">전체</option>
                 <option value="unread">안읽음만</option>
@@ -271,7 +273,7 @@ const Sent = () => {
               <select
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value)}
-                className="w-full pl-10 pr-8 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
+                className="w-full pl-10 pr-8 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 appearance-none cursor-pointer"
               >
                 <option value="desc">최신순</option>
                 <option value="asc">오래된순</option>
@@ -287,7 +289,7 @@ const Sent = () => {
                   setPageSize(Number(e.target.value))
                   setCurrentPage(1)
                 }}
-                className="w-full px-3 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
+                className="w-full px-3 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 appearance-none cursor-pointer"
               >
                 <option value="5">5개씩</option>
                 <option value="10">10개씩</option>
@@ -306,7 +308,7 @@ const Sent = () => {
                 value={tempKeyword}
                 onChange={(e) => setTempKeyword(e.target.value)}
                 placeholder="내용으로 검색..."
-                className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
               {tempKeyword && (
                 <button
@@ -322,7 +324,7 @@ const Sent = () => {
             {/* 검색 버튼 */}
             <button
               type="submit"
-              className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition whitespace-nowrap"
+              className="flex items-center justify-center space-x-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition whitespace-nowrap"
             >
               <Search className="h-5 w-5" />
               <span>검색</span>
@@ -330,16 +332,16 @@ const Sent = () => {
           </div>
 
           {searchKeyword && (
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
               <div className="flex items-center space-x-2 text-sm">
-                <span className="text-blue-600 font-medium">"{searchKeyword}"</span>
+                <span className="text-purple-600 font-medium">"{searchKeyword}"</span>
                 <span className="text-gray-600">로 검색 중</span>
                 <span className="text-gray-500">({filtered.length}건)</span>
               </div>
               <button
                 type="button"
                 onClick={handleClearSearch}
-                className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-700 transition"
+                className="flex items-center space-x-1 text-sm text-purple-600 hover:text-purple-700 transition"
               >
                 <X className="h-4 w-4" />
                 <span>검색 초기화</span>
@@ -363,7 +365,13 @@ const Sent = () => {
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
                   상태
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    발신자
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4" />
                     수신자
@@ -386,8 +394,8 @@ const Sent = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {paginatedData.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
-                    보낸 쪽지가 없습니다
+                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                    메시지가 없습니다
                   </td>
                 </tr>
               ) : (
@@ -410,20 +418,33 @@ const Sent = () => {
                       )}
                     </td>
 
+                    {/* 발신자 */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+                          <span className="text-xs font-medium text-purple-600">
+                            {message.senderId}
+                          </span>
+                        </div>
+                        <div className="ml-2">
+                          <div className="text-sm font-medium text-gray-900">
+                            ID {message.senderId}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+
                     {/* 수신자 */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-blue-600">
+                        <div className="flex-shrink-0 h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="text-xs font-medium text-blue-600">
                             {message.receiverId}
                           </span>
                         </div>
-                        <div className="ml-3">
+                        <div className="ml-2">
                           <div className="text-sm font-medium text-gray-900">
                             ID {message.receiverId}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            받는 사람
                           </div>
                         </div>
                       </div>
@@ -503,6 +524,7 @@ const Sent = () => {
 
                   {/* 페이지 번호 */}
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    // 현재 페이지 근처만 표시
                     if (
                       page === 1 ||
                       page === totalPages ||
@@ -513,7 +535,7 @@ const Sent = () => {
                           key={page}
                           onClick={() => handlePageChange(page)}
                           className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === page
-                              ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                              ? 'z-10 bg-purple-50 border-purple-500 text-purple-600'
                               : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                             }`}
                         >
@@ -553,4 +575,4 @@ const Sent = () => {
   )
 }
 
-export default Sent
+export default AllMessages
