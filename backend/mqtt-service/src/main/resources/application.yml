@@ -1,0 +1,104 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: mqtt-service
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false  # ✅ 알 수 없는 필드 무시
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS
+  
+  # Kafka 설정
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      # acks: all
+      # retries: 3
+      # properties:
+      #   spring.json.add.type.headers: true  # ✅ 타입 정보 추가
+    consumer:
+      group-id: mqtt-service-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+    
+# AWS IoT 설정
+aws:
+  iot:
+    # AWS IoT Core endpoint
+    endpoint: a2uullhbffujtb-ats.iot.ap-northeast-2.amazonaws.com
+    # Client ID
+    client-id: mqtt-service-${random.uuid}
+    # Certificate 경로
+    certificate-file: ./certs/certificate.pem.crt
+    private-key-file: ./certs/private.pem.key
+    # Subscribe topics (쉼표로 구분)
+    subscribe-topics: device/topic/+
+    # Publish topics
+    publish-topics:
+      request: device/topic/A0
+      response: device/topic/B0
+      test: device/topic/B1
+    # QoS 설정
+    qos: 0
+    # Connection timeout (ms)
+    connection-timeout: 30000
+    # Keep alive interval (seconds)
+    keep-alive-interval: 60
+
+# Kafka Topics 설정
+kafka:
+  topics:
+    # MQTT → Kafka (IoT 디바이스에서 수신한 메시지)
+    mqtt-message: mqtt.message.topic
+    device-data: device.data.topic
+    device-request: device.request.topic
+    device-response: device.response.topic
+    fota: device.fota.topic
+    reboot: device.reboot.topic
+    
+    # Kafka → MQTT (message-service에서 IoT로 보낼 명령)
+    mqtt-command: mqtt.command.topic  # message-service가 발행, mqtt-service가 구독
+
+# Eureka Client 설정
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    instance-id: ${spring.application.name}:${server.port}
+
+# Actuator 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Logging 설정
+logging:
+  level:
+    com.enterprise.mqtt: DEBUG
+    org.springframework.kafka: INFO
+    com.amazonaws.services.iot: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+  file:
+    name: logs/mqtt-service.log

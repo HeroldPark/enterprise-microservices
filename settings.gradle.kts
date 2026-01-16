@@ -23,6 +23,7 @@ include("backend:board-service")
 include("backend:admin-service")
 include("backend:message-service")
 include("backend:model-service")
+include("backend:mqtt-service")
 
 // Frontend app (기존)
 include("app")

@@ -138,3 +138,6 @@ Dev/Prod 프로파일별 설정 예시 포함
   - docker-compose.yml, application.yml, application-dev.yml, logback-spring.xml, log4jdbc.log4j2.properties
   - local, dev, prod 분리 설정
   - kafka : 받은 쪽지함, 보낸 쪽지함, 전체 메시지, 자동 생성기
+
+# 2026-01-16
+  - mqtt-service, message-service 연동 중.

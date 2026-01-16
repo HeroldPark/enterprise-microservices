@@ -4,6 +4,13 @@ server:
 spring:
   application:
     name: message-service
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false  # ✅ 알 수 없는 필드 무시
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS
   # docker-compose.yml에서 결정
   # profiles:
   #   # 실행 시: --spring.profiles.active=dev / local / prod
@@ -14,12 +21,11 @@ spring:
       group-id: message-service-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      # ErrorHandlingDeserializer 사용
-      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       properties:
         spring.json.trusted.packages: "*"
         # 실제 deserializer 지정
-        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        # spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -50,6 +56,16 @@ kafka:
     message-created: message.created
     message-read: message.read
     message-deleted: message.deleted
+    
+    # IoT 디바이스 메시지 토픽 (mqtt-service에서 수신)
+    device-data: device.data.topic           # PERIODIC, DISCRETE, ECHO 데이터
+    device-request: device.request.topic     # REQUEST 메시지
+    device-response: device.response.topic   # RESPONSE 메시지
+    fota: device.fota.topic                  # FOTA 메시지
+    reboot: device.reboot.topic              # REBOOT 메시지
+    
+    # MQTT 명령 토픽 (message-service → mqtt-service)
+    mqtt-command: mqtt.command.topic         # IoT로 보낼 명령
 
 jwt:
   secret: your-secret-key-must-be-at-least-256-bits-long-for-HS256-algorithm
@@ -92,6 +108,8 @@ logging:
     # org.hibernate.orm.jdbc.bind: TRACE      # ? 바인딩 값
     # org.hibernate.orm.jdbc.extract: TRACE   # ✅ 조회 결과(추출된 값) 로그
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE    # SQL 파라미터 바인딩
+  file:
+    name: logs/message-service.log
 
 cors:
   allowed-origins:

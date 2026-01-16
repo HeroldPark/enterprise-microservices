@@ -482,8 +482,36 @@ services:
       SPRING_DATASOURCE_USERNAME: rozeta
       SPRING_DATASOURCE_PASSWORD: rozeta123
 
+      # Eureka
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      
+      # Kafka 설정
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_CONSUMER_GROUP_ID: message-service-group
+      
+      # Kafka Topics - 기존 메시지 이벤트
+      KAFKA_TOPIC_MESSAGE_CREATED: message.created
+      KAFKA_TOPIC_MESSAGE_READ: message.read
+      KAFKA_TOPIC_MESSAGE_DELETED: message.deleted
+      
+      # Kafka Topics - IoT 디바이스 메시지 (mqtt-service → message-service)
+      KAFKA_TOPIC_DEVICE_DATA: device.data.topic
+      KAFKA_TOPIC_DEVICE_REQUEST: device.request.topic
+      KAFKA_TOPIC_DEVICE_RESPONSE: device.response.topic
+      KAFKA_TOPIC_FOTA: device.fota.topic
+      KAFKA_TOPIC_REBOOT: device.reboot.topic
+      
+      # Kafka Topics - MQTT 명령 (message-service → mqtt-service)
+      KAFKA_TOPIC_MQTT_COMMAND: mqtt.command.topic
+      
+      # Logging
+      LOGGING_LEVEL_COM_ENTERPRISE_MESSAGE: INFO
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_KAFKA: INFO
+
+    volumes:
+      - ./logs/message-service:/app/logs  # ✅ 추가
+      
     networks:
       - enterprise-network
     depends_on:
@@ -493,6 +521,8 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      mqtt-service:
+        condition: service_started
     restart: on-failure
 
   model-service:
@@ -512,6 +542,7 @@ services:
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
     networks:
       - enterprise-network
     depends_on:
@@ -521,6 +552,88 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+    restart: on-failure
+
+  mqtt-service:
+    build:
+      context: ./backend/mqtt-service
+      dockerfile: Dockerfile
+      cache_from:
+        - mqtt-service:latest
+    image: mqtt-service:latest
+    container_name: mqtt-service
+    ports:
+      - "8088:8088"
+      # - "1883:1883"
+    environment:
+      # Spring profiles
+      SPRING_PROFILES_ACTIVE: dev
+
+      # AWS IoT Core 설정
+      AWS_IOT_ENDPOINT: ${AWS_IOT_ENDPOINT:-a2uullhbffujtb-ats.iot.ap-northeast-2.amazonaws.com}
+      AWS_IOT_CLIENT_ID: mqtt-service-${RANDOM_UUID:-prod}
+      AWS_IOT_CERTIFICATE_FILE: /app/certs/certificate.pem.crt
+      AWS_IOT_PRIVATE_KEY_FILE: /app/certs/private.pem.key
+      AWS_IOT_CONNECTION_TIMEOUT: 30000
+      AWS_IOT_KEEP_ALIVE_INTERVAL: 60
+      
+      # AWS IoT Subscribe Topics
+      AWS_IOT_SUBSCRIBE_TOPICS: device/topic/+
+      AWS_IOT_QOS: 0
+      
+      # AWS IoT Publish Topics
+      AWS_IOT_PUBLISH_TOPICS_REQUEST: device/topic/A0
+      AWS_IOT_PUBLISH_TOPICS_RESPONSE: device/topic/B0
+      AWS_IOT_PUBLISH_TOPICS_TEST: device/topic/B1
+      
+      # Kafka 설정
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_CONSUMER_GROUP_ID: mqtt-service-group
+      SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET: earliest
+      
+      # Kafka Topics (IoT → Kafka)
+      KAFKA_TOPICS_MQTT_MESSAGE: mqtt.message.topic
+      KAFKA_TOPICS_DEVICE_DATA: device.data.topic
+      KAFKA_TOPICS_DEVICE_REQUEST: device.request.topic
+      KAFKA_TOPICS_DEVICE_RESPONSE: device.response.topic
+      KAFKA_TOPICS_FOTA: device.fota.topic
+      KAFKA_TOPICS_REBOOT: device.reboot.topic
+      
+      # Kafka Topics (Kafka → IoT)
+      KAFKA_TOPICS_MQTT_COMMAND: mqtt.command.topic
+      
+      # Eureka
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_CLIENT_FETCH_REGISTRY: true
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: true
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: true
+      
+      # Logging
+      LOGGING_LEVEL_COM_ROZETA_MQTT: INFO
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_KAFKA: INFO
+      LOGGING_LEVEL_COM_AMAZONAWS_SERVICES_IOT: INFO
+
+    volumes:
+      # AWS IoT 인증서 마운트 (./certs 디렉토리에 인증서 파일 배치 필요)
+      - ./backend/mqtt-service/certs:/app/certs:ro
+      #  ^^^^^ 로컬의 certs 폴더
+      #         ^^^^^^^^^ 컨테이너의 /app/certs
+      #                  ^^ 읽기 전용 (read-only)
+      - ./logs/mqtt-service:/app/logs  # ✅ 추가
+
+    networks:
+      - enterprise-network
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8088/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
     restart: on-failure
 
   # =====================================================
@@ -557,6 +670,8 @@ services:
       message-service:
         condition: service_started
       model-service:
+        condition: service_started
+      mqtt-service:
         condition: service_started
     restart: on-failure
 
