@@ -44,6 +44,9 @@ public class KafkaProducerService {
     @Value("${kafka.topics.reboot}")
     private String rebootTopic;
 
+    @Value("${kafka.topics.text}")
+    private String textTopic;
+
     /**
      * MQTT 메시지를 Kafka로 전송
      * 메시지 타입에 따라 적절한 토픽으로 라우팅
@@ -93,6 +96,7 @@ public class KafkaProducerService {
             case RESPONSE -> deviceResponseTopic;
             case FOTA -> fotaTopic;
             case REBOOT -> rebootTopic;
+            case PLAINTEXT -> textTopic;
             default -> mqttMessageTopic;
         };
     }

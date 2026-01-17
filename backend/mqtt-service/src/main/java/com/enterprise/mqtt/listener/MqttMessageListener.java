@@ -71,9 +71,10 @@ public class MqttMessageListener {
             // 페이로드 정리 (따옴표 제거)
             String cleanedPayload = payload.replaceAll("\"", "").trim();
 
-            // 메시지 타입: 기본값 TEXT (device/topic/C0 등)
-            MqttMessage.MessageType messageType = MqttMessage.MessageType.TEXT;
+            // 메시지 타입: 기본값 PLAINTEXT (device/topic/C0 등)
+            MqttMessage.MessageType messageType = MqttMessage.MessageType.PLAINTEXT;
             String deviceId = null;
+            String hexString = null;
 
             // device/topic/A0 또는 B0인 경우만 Base64 디코딩 및 파싱
             if (topic.equals("device/topic/A0") || topic.equals("device/topic/B0")) {
@@ -96,6 +97,10 @@ public class MqttMessageListener {
                     
                     // 디바이스 ID 추출 (메시지 페이로드에서)
                     deviceId = extractDeviceIdFromPayload(byteArray, messageType);
+
+                    // ✅ Hex로 변환
+                    hexString = bytesToHex(byteArray);
+                    log.debug("Converted to Hex: {}", hexString);
                 }
 
                 // Hex 덤프 로깅 (디버그용)
@@ -103,9 +108,9 @@ public class MqttMessageListener {
                     logHexDump(byteArray);
                 }
             } else {
-                // TEXT 메시지 (device/topic/C0 등)
-                log.info("TEXT message from topic: {}, payload length: {}", topic, cleanedPayload.length());
-                // deviceId는 null로 유지 (TEXT 메시지는 deviceId 없음)
+                // PLAINTEXT 메시지 (device/topic/C0 등)
+                log.info("PLAINTEXT message from topic: {}, payload length: {}", topic, cleanedPayload.length());
+                // deviceId는 null로 유지 (PLAINTEXT 메시지는 deviceId 없음)
             }
 
             // MqttMessage DTO 생성
@@ -115,7 +120,7 @@ public class MqttMessageListener {
                     .messageType(messageType)
                     .deviceId(deviceId)  // TEXT인 경우 null
                     .rawMessage(cleanedPayload)
-                    .parsedMessage(null)  // 파싱은 다른 서비스에서 처리
+                    .parsedMessage(hexString)  // 파싱은 다른 서비스에서 처리
                     .qos(qos)
                     .receivedAt(LocalDateTime.now())
                     .build();
@@ -200,5 +205,14 @@ public class MqttMessageListener {
         
         hexOutput.append(String.format("\nTotal: %d bytes\n", byteArray.length));
         log.debug(hexOutput.toString());
+    }
+
+    // ✅ Hex 변환 헬퍼 메서드 추가
+    private String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            sb.append(String.format("%02X", b));
+        }
+        return sb.toString();
     }
 }

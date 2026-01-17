@@ -141,3 +141,8 @@ Dev/Prod 프로파일별 설정 예시 포함
 
 # 2026-01-16
   - mqtt-service, message-service 연동 중.
+
+# 2026-01-17
+  - mqtt-service, message-service 연동 완료
+  - PLAINTEXT topic 추가
+  - mqtt 테스트, 모니텅 frontend 추가

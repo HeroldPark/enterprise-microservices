@@ -57,8 +57,9 @@ public class IoTDeviceMessageDto {
     
     /**
      * 수신 시각
+     * Jackson의 기본 LocalDateTime 파서 사용 (가변 나노초 자릿수 지원)
      */
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime receivedAt;
     
     /**
@@ -74,6 +75,6 @@ public class IoTDeviceMessageDto {
         FOTA,        // 펌웨어 업데이트
         REBOOT,      // 재시작
         NTP,         // 시간 동기화
-        TEXT         // 텍스트
+        PLAINTEXT    // 평문 텍스트
     }
 }

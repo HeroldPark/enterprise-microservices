@@ -29,7 +29,7 @@ public class MqttMessage {
     private String topic;
     
     /**
-     * 메시지 타입 (PERIODIC, DISCRETE, REQUEST, RESPONSE, ECHO, FOTA, REBOOT, NTP, TEXT)
+     * 메시지 타입 (PERIODIC, DISCRETE, REQUEST, RESPONSE, ECHO, FOTA, REBOOT, NTP, PLAINTEXT)
      */
     private MessageType messageType;
     // private String messageType; // ✅ String (Enum 아님)
@@ -73,7 +73,7 @@ public class MqttMessage {
         FOTA(6),
         REBOOT(7),
         NTP(8),
-        TEXT(9);
+        PLAINTEXT(9);
         
         private final int code;
         

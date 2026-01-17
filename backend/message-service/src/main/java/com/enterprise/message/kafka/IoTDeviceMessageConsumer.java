@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Base64;
 import java.util.Map;
 
 import org.springframework.kafka.annotation.KafkaListener;
@@ -50,6 +51,7 @@ public class IoTDeviceMessageConsumer {
                 case PERIODIC -> processPeriodicData(message);
                 case DISCRETE -> processDiscreteData(message);
                 case ECHO -> processEchoData(message);
+                case PLAINTEXT -> processPlainTextData(message);
                 default -> log.warn("Unhandled message type in device-data: {}", message.getMessageType());
             }
 
@@ -174,6 +176,35 @@ public class IoTDeviceMessageConsumer {
         }
     }
 
+    /**
+     * PLAINTEXT 메시지 수신 (device/topic/C0 등)
+     */
+    @KafkaListener(
+            topics = "${kafka.topic.text}",
+            groupId = "${spring.kafka.consumer.group-id}",
+            containerFactory = "stringKafkaListenerContainerFactory"
+    )
+    public void consumePlainTextMessage(
+            @Payload String messageJson,
+            @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
+            @Header(KafkaHeaders.OFFSET) long offset) {
+
+        log.info("Received PLAINTEXT message from partition {}, offset {}", partition, offset);
+
+        try {
+            IoTDeviceMessageDto message = objectMapper.readValue(messageJson, IoTDeviceMessageDto.class);
+            
+            log.info("Processing PLAINTEXT message - Topic: {}, Message ID: {}, Content Length: {}", 
+                    message.getTopic(), message.getMessageId(), 
+                    message.getRawMessage() != null ? message.getRawMessage().length() : 0);
+
+            processPlainTextData(message);
+
+        } catch (Exception e) {
+            log.error("Error processing PLAINTEXT message", e);
+        }
+    }
+
     // === Private Processing Methods ===
 
     /**
@@ -217,13 +248,35 @@ public class IoTDeviceMessageConsumer {
      * 디바이스 등록 요청 처리
      */
     private void processDeviceRequest(IoTDeviceMessageDto message) {
-        log.info("Processing device REQUEST - Device: {}, Raw: {}", 
-                message.getDeviceId(), message.getRawMessage());
+        log.debug("Processing device REQUEST - Device: {}, Parsed: {}", 
+                message.getDeviceId(), message.getParsedMessage());
         
         // TODO: 실제 비즈니스 로직 구현
         // 1. 디바이스 등록 처리
         // 2. 인증 정보 생성
         // 3. 응답 메시지 전송
+        // ✅ parsedMessage(Hex)를 사용
+        String hexData = message.getParsedMessage();
+        
+        if (hexData != null && !hexData.isEmpty()) {
+            // log.info("Hex data: {}", hexData);
+
+            // 필요시 Hex를 다시 byte[]로 변환
+            byte[] bytes = hexToBytes(hexData);
+            logHexDump(bytes);
+            
+            // 비즈니스 로직 처리
+            // ...
+        } else {
+            log.warn("No parsed message available, falling back to raw Base64");
+            // Fallback: rawMessage를 디코딩
+            try {
+                byte[] bytes = Base64.getDecoder().decode(message.getRawMessage());
+                // ...
+            } catch (Exception e) {
+                log.error("Failed to decode raw message", e);
+            }
+        }
     }
 
     /**
@@ -261,5 +314,65 @@ public class IoTDeviceMessageConsumer {
         // TODO: 실제 비즈니스 로직 구현
         // 1. 재시작 완료 확인
         // 2. 상태 업데이트
+    }
+
+    /**
+     * PLAINTEXT 메시지 처리 (device/topic/C0 등의 평문 텍스트 데이터)
+     */
+    private void processPlainTextData(IoTDeviceMessageDto message) {
+        log.info("Processing PLAINTEXT data - Topic: {}, Raw: {}", 
+                message.getTopic(), message.getRawMessage());
+        
+        // TODO: 실제 비즈니스 로직 구현
+        // 1. 텍스트 메시지 파싱
+        // 2. 로그 저장
+        // 3. 필요시 알림 또는 외부 시스템 연동
+        // 4. 메시지 내용에 따른 분기 처리
+        
+        // 예시: 간단한 로그 처리
+        try {
+            String textContent = message.getRawMessage();
+            log.info("PLAINTEXT Message Content: {}", textContent);
+            
+            // 특정 키워드에 따른 처리 예시
+            if (textContent != null) {
+                if (textContent.contains("ALERT")) {
+                    log.warn("ALERT keyword detected in PLAINTEXT message");
+                    // 알림 처리 로직
+                } else if (textContent.contains("INFO")) {
+                    log.info("INFO message received");
+                    // 정보성 메시지 처리
+                }
+            }
+            
+        } catch (Exception e) {
+            log.error("Error processing PLAINTEXT message content", e);
+        }
+    }
+
+    // ✅ Hex → byte[] 변환 헬퍼 메서드
+    private byte[] hexToBytes(String hex) {
+        int len = hex.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
+                                + Character.digit(hex.charAt(i+1), 16));
+        }
+        return data;
+    }
+
+    private void logHexDump(byte[] byteArray) {
+        StringBuilder hexOutput = new StringBuilder();
+        // hexOutput.append("\n=== Hex Dump ===\n");
+        
+        for (int i = 0; i < byteArray.length; i++) {
+            hexOutput.append(String.format("%02X ", byteArray[i] & 0xFF));
+            if ((i + 1) % 16 == 0) {
+                hexOutput.append("\n");
+            }
+        }
+        
+        hexOutput.append(String.format("\nTotal: %d bytes\n", byteArray.length));
+        log.info(hexOutput.toString());
     }
 }

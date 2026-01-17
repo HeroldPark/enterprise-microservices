@@ -61,6 +61,10 @@ import MessageDetail from './components/message/pages/MessageDetail'
 import AllMessages from './components/message/pages/AllMessages'
 import AutoMessageGenerator from './components/message/pages/AutoMessageGenerator'
 
+// MQTT pages
+import MqttMessageTester from './components/mqtt/pages/MqttMessageTester'
+import MqttMessageMonitor from './components/mqtt/pages/MqttMessageMonitor'
+
 // Test pages (개발용)
 import MenuPermissionsTest from './components/menu/MenuPermissionsTest'
 
@@ -312,6 +316,24 @@ function App() {
         />
         {/* ✅ 자동 생성기 라우트 추가 */}
         <Route path="/messages/auto-generator" element={<AutoMessageGenerator />} />
+
+        {/* MQTT Routes - USER, ADMIN만 접근 가능 */}
+        <Route
+          path="/mqtt/tester"
+          element={
+            <RoleBasedRoute requiredRole={ROLES.USER}>
+              <MqttMessageTester />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/mqtt/monitor"
+          element={
+            <RoleBasedRoute requiredRole={ROLES.USER}>
+              <MqttMessageMonitor />
+            </RoleBasedRoute>
+          }
+        />
 
         {/* Fallback Route */}
         <Route path="*" element={<Navigate to="/" replace />} />

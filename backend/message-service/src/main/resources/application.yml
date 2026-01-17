@@ -63,6 +63,7 @@ kafka:
     device-response: device.response.topic   # RESPONSE 메시지
     fota: device.fota.topic                  # FOTA 메시지
     reboot: device.reboot.topic              # REBOOT 메시지
+    text: device.text.topic                  # TEXT 메시지
     
     # MQTT 명령 토픽 (message-service → mqtt-service)
     mqtt-command: mqtt.command.topic         # IoT로 보낼 명령
@@ -100,7 +101,7 @@ management:
 
 logging:
   level:
-    com.enterprise.message: INFO            # message-service 애플리케이션 로그
+    com.enterprise.message: DEBUG           # message-service 애플리케이션 로그
     org.springframework.web: INFO           # Spring Web 로그
     org.springframework.kafka: INFO         # ← Spring Kafka 프레임워크 로그 (상세)
     org.apache.kafka: INFO                  # Apache Kafka 클라이언트 로그

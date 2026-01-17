@@ -501,6 +501,7 @@ services:
       KAFKA_TOPIC_DEVICE_RESPONSE: device.response.topic
       KAFKA_TOPIC_FOTA: device.fota.topic
       KAFKA_TOPIC_REBOOT: device.reboot.topic
+      KAFKA_TOPIC_TEXT: device.text.topic
       
       # Kafka Topics - MQTT 명령 (message-service → mqtt-service)
       KAFKA_TOPIC_MQTT_COMMAND: mqtt.command.topic
@@ -598,6 +599,7 @@ services:
       KAFKA_TOPICS_DEVICE_RESPONSE: device.response.topic
       KAFKA_TOPICS_FOTA: device.fota.topic
       KAFKA_TOPICS_REBOOT: device.reboot.topic
+      KAFKA_TOPICS_TEXT: device.text.topic
       
       # Kafka Topics (Kafka → IoT)
       KAFKA_TOPICS_MQTT_COMMAND: mqtt.command.topic

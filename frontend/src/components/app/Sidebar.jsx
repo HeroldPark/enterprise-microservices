@@ -5,7 +5,7 @@ import {
   ChevronDown, ChevronRight, Menu as MenuIcon,
   BarChart, FileText, Shield, Database, X, Brain, LogOut, Sparkles,
   Target, GitBranch, Zap, Trees, TrendingUp, Lock, Bell, Heart, MessageSquare,
-  Send, Inbox, Mail, MessageCircle, Cuboid
+  Send, Inbox, Mail, MessageCircle, Cuboid, Radio
 } from 'lucide-react'
 import { useAuthStore } from './authStore'
 import menuApi from '../menu/menuApi'  // ← menuApi import 추가
@@ -54,7 +54,8 @@ const iconMap = {
   'Inbox': Inbox,
   'Mail': Mail,
   'MessageCircle': MessageCircle,
-  'Cuboid': Cuboid
+  'Cuboid': Cuboid,
+  'Radio': Radio
 }
 
 // 권한별 한글 표시
@@ -190,6 +191,26 @@ const Sidebar = ({ isOpen, onClose }) => {
                 icon: Sparkles,
                 badge: 'NEW',  // 선택사항: 새 기능 표시
               },
+            ]
+          },
+          {
+            id: 'mqtt',
+            name: 'MQTT',
+            path: null,
+            icon: 'Radio',
+            children: [
+              {
+                id: 'mqtt-tester',
+                name: '메시지 테스터',
+                path: '/mqtt/tester',
+                icon: 'Send'
+              },
+              {
+                id: 'mqtt-monitor',
+                name: '메시지 모니터',
+                path: '/mqtt/monitor',
+                icon: 'BarChart'
+              }
             ]
           }
         ]

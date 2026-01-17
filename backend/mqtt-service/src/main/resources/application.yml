@@ -57,11 +57,14 @@ kafka:
   topics:
     # MQTT → Kafka (IoT 디바이스에서 수신한 메시지)
     mqtt-message: mqtt.message.topic
-    device-data: device.data.topic
-    device-request: device.request.topic
-    device-response: device.response.topic
-    fota: device.fota.topic
-    reboot: device.reboot.topic
+
+    # IoT 디바이스 메시지 토픽 (mqtt-service에서 수신)
+    device-data: device.data.topic           # PERIODIC, DISCRETE, ECHO 데이터
+    device-request: device.request.topic     # REQUEST 메시지
+    device-response: device.response.topic   # RESPONSE 메시지
+    fota: device.fota.topic                  # FOTA 메시지
+    reboot: device.reboot.topic              # REBOOT 메시지
+    text: device.text.topic                  # TEXT 메시지
     
     # Kafka → MQTT (message-service에서 IoT로 보낼 명령)
     mqtt-command: mqtt.command.topic  # message-service가 발행, mqtt-service가 구독
@@ -87,12 +90,12 @@ management:
   endpoint:
     health:
       show-details: always
-  metrics:
-    export:
-      prometheus:
+  prometheus:
+    metrics:
+      export:
         enabled: true
-
-# Logging 설정
+        
+        # Logging 설정
 logging:
   level:
     com.enterprise.mqtt: DEBUG

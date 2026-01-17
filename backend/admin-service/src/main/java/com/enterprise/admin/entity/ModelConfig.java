@@ -44,7 +44,7 @@ public class ModelConfig {
     /**
      * 설정 설명
      */
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "PLAINTEXT")
     private String description;
     
     /**
